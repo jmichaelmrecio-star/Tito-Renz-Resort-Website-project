@@ -1,0 +1,642 @@
+/* --- CSS VARIABLES for Easy Customization --- */
+:root {
+    /* CHANGED: Switched primary color to a professional green */
+    --primary-color: #28a745; /* Green for Header and Buttons */
+    --secondary-color: #6c757d; /* Neutral Grey */
+    --background-color: #f8f9fa; /* Light background */
+    --text-color: #343a40; /* Dark text */
+    --border-radius: 8px;
+    --spacing: 1.5rem;
+}
+
+/* --- Base Styles --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-color);
+}
+
+body {
+    background-color: var(--background-color);
+    line-height: 1.6;
+}
+
+
+
+/* --- Header and Navigation --- */
+header {
+    /* CHANGED: Background color set to the new green primary color */
+    background-color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem var(--spacing);
+}
+
+nav h1 {
+    color: #e9ecef !important;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+}
+
+nav ul li {
+    margin-left: var(--spacing);
+}
+
+nav ul li a {
+    color: white !important;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+nav ul li a:hover {
+    color: #e9ecef !important;
+}
+
+/* --- Main Content Layout --- */
+main {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 var(--spacing);
+}
+
+
+/* --- Buttons --- */
+.button-primary {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: white !important;
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1rem;
+}
+
+.button-primary:hover {
+    background-color: #0056b3; /* Darker shade of primary color */
+}
+
+/* --- Form Styles (reserve.html) --- */
+#reservation-form-area {
+    background-color: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#reservation-form-area h2 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: var(--primary-color);
+}
+
+fieldset {
+    border: 1px solid #dee2e6;
+    padding: var(--spacing);
+    margin-bottom: var(--spacing);
+    border-radius: var(--border-radius);
+}
+
+legend {
+    font-weight: bold;
+    color: var(--primary-color);
+    padding: 0 0.5rem;
+}
+
+form label {
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+form input, form select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+/* Make the submit button full width */
+#reservationForm button[type="submit"] {
+    width: 100%;
+    margin-top: 2rem;
+}
+
+/* --- Footer --- */
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border-top: 1px solid #e9ecef;
+    color: var(--secondary-color);
+}
+
+/* --- New Services Section (index.html) --- */
+#services {
+    padding: 3rem var(--spacing); /* Add padding around the whole section */
+    text-align: center;
+}
+
+#services h2 {
+    margin-bottom: 2.5rem;
+    color: var(--primary-color);
+    font-size: 2rem;
+}
+
+.service-cards {
+    display: flex;
+    gap: var(--spacing);
+    flex-wrap: wrap; 
+    justify-content: center;
+}
+
+.card {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    flex: 1; /* Makes cards try to share equal space */
+    min-width: 280px; /* Minimum size before wrapping */
+    text-align: left;
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px); /* Nice little lift effect */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.card h3 {
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+}
+
+.card .price {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-top: 1rem;
+    font-size: 1.1rem;
+}
+
+/* --- NEW HERO STYLE (for index.html) --- */
+#hero-new {
+    /* CRITICAL: Simulated background image for visual impact */
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/resort-image.jpg'); 
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-align: center;
+    
+    /* Make it tall (80% of the screen height) */
+    height: 80vh; 
+    
+    /* Center the content vertically and horizontally */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--spacing);
+}
+
+.hero-content-wrapper {
+    max-width: 800px;
+}
+
+#hero-new h1 {
+    color: white;
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.tagline {
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    font-weight: 300;
+}
+
+.quick-facts {
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+.quick-facts span {
+    color: white;
+    margin: 0 10px;
+    padding: 5px 10px;
+    /* Use your primary green with slight transparency */
+    background-color: rgba(40, 167, 69, 0.8); 
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+/* --- HOMEPAGE CONTENT STYLES --- */
+
+.section-tagline {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+/* Featured Amenities Section */
+#featured-amenities {
+    padding: 4rem var(--spacing);
+    text-align: center;
+}
+
+#featured-amenities h2 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.amenity-card {
+    background-color: #f7f7f7;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+}
+
+.amenity-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(40, 167, 69, 0.1);
+}
+
+.amenity-card h3 {
+    color: var(--primary-color);
+    margin-top: 10px;
+}
+
+/* Resort Dining Section */
+#resort-dining {
+    background-color: #f8f9fa;
+    padding: 5rem 0;
+}
+
+.dining-flex {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing);
+}
+
+.dining-content {
+    flex: 1;
+}
+
+.dining-image {
+    flex: 1;
+    text-align: center;
+    min-width: 300px; /* Prevent image from collapsing too much */
+}
+
+.dining-image img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.section-label {
+    color: #6c757d;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+}
+
+#resort-dining h2 {
+    color: var(--text-color);
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Responsive adjustment for small screens */
+@media (max-width: 768px) {
+    .dining-flex {
+        flex-direction: column;
+    }
+}
+
+/* --- New Button Style for Dark Backgrounds --- */
+.button-secondary {
+    background-color: white;
+    color: var(--primary-color); /* Green text */
+    padding: 12px 30px;
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    font-weight: bold;
+    display: inline-block;
+    transition: background-color 0.3s;
+    border: 2px solid white; /* Ensures button is visible */
+}
+
+.button-secondary:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* --- NEW FOOTER STYLES --- */
+footer {
+    background-color: #f8f9fa; /* Light background for contrast */
+    color: var(--text-color);
+    padding: 3rem 0 1rem 0;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-around;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing);
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.footer-section {
+    min-width: 200px;
+}
+
+.footer-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li a {
+    color: var(--text-color);
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+    display: block;
+    transition: color 0.3s;
+}
+
+.footer-section ul li a:hover {
+    color: var(--primary-color);
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #dee2e6;
+    font-size: 0.9rem;
+}
+
+/* --- DROPDOWN MENU STYLES --- */
+.profile-dropdown {
+    position: relative;
+    display: inline-block;
+    margin-left: 15px; /* Adds space from the Admin Dashboard link */
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: white; /* Matches navigation text color */
+    height: 100%;
+
+    /* --- NEW STYLES FOR CIRCLE BORDER --- */
+    width: 40px; /* Give it a fixed width */
+    height: 40px; /* Give it a fixed height */
+    border: 2px solid white; /* White border */
+    border-radius: 50%; /* Makes it a circle */
+    display: flex; /* Use flexbox to center the content */
+    align-items: center; /* Vertically center */
+    justify-content: center; /* Horizontally center */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    transition: background-color 0.3s, border-color 0.3s; /* Smooth transition on hover */
+}
+
+.icon-button:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* Slight highlight on hover */
+    border-color: var(--primary-color); /* Green border on hover */
+}
+
+.dropdown-content {
+    display: none;
+    color: black;
+    position: absolute;
+    right: 0;
+    background-color: black;
+    min-width: 160px;
+    box-shadow: 0 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1001; /* Ensure it's above everything else */
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-top: 10px; /* Small gap from the icon */
+}
+
+.dropdown-content a{
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+    transition: background-color 0.3s;
+}
+
+.dropdown-content a:hover {
+    background-color: #4a4848;
+}
+
+/* This class is added by JavaScript when the menu is active */
+.show-dropdown {
+    display: block;
+}
+
+/* Styling for Blocked/Unavailable Cards */
+.service-card.disabled-card {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #fcebeb; /* Light red background */
+    box-shadow: none;
+}
+.service-card.disabled-card:hover {
+    transform: none; /* Prevent lifting on hover */
+    box-shadow: none;
+}
+
+/* --- Updated CSS for Horizontal Checkbox Layout in Admin Dashboard --- */
+
+/* Targets the main container for the service checkboxes */
+#serviceCheckboxes {
+    display: flex; 
+    flex-wrap: wrap; /* CRITICAL: Allows items to wrap to the next line */
+    /* Remove 'flex-direction: column;' - The default is 'row' (horizontal) */
+    gap: 15px 30px; /* Vertical gap (15px) and Horizontal gap (30px) */
+    padding: 10px 0;
+}
+
+/* Targets the container for each individual checkbox and its label */
+.checkbox-item {
+    /* Keep this to align the checkbox and its label text horizontally */
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    margin-bottom: 5px; 
+}
+
+/* Style the checkbox itself */
+.checkbox-item input[type="checkbox"] {
+    width: 18px; 
+    height: 18px;
+    margin: 0; 
+}
+
+/* Style the label text */
+.checkbox-item label {
+    font-weight: normal;
+    cursor: pointer;
+    margin: 0;
+}
+
+/* Highlight the Promo Code Input Area on reserve.html */
+#promoCodeInput {
+    border: 2px dashed var(--color-accent); /* Make it obvious */
+    background-color: #fff8e1; /* Light yellow background */
+    transition: border-color 0.3s;
+}
+
+#promoCodeInput:focus {
+    border-color: var(--color-primary);
+}
+
+/* --- New Profile & Admin Table Alignment Fix --- */
+.data-table th, 
+.data-table td {
+    padding: 12px 8px; /* Standard padding for all cells */
+    text-align: left; /* Default alignment for text/names */
+}
+
+/* Center-align specific columns for better visual balance */
+/* Targeting the 1st, 4th, and 5th columns (ID, Status, Total Paid) */
+.data-table th:nth-child(1),
+.data-table td:nth-child(1), /* ID */
+.data-table th:nth-child(4),
+.data-table td:nth-child(4), /* Status */
+.data-table th:nth-child(5),
+.data-table td:nth-child(5) { /* Total Paid */
+    text-align: center;
+}
+
+/* Ensure the Status spans look great when centered */
+.status-checked-in,
+.status-pending {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: bold;
+    min-width: 80px; /* Gives a consistent minimum width */
+    text-align: center;
+}
+
+/* --- New Reservation Status Styles (DFD 6.0/2.0) --- */
+
+/* Pending (Default / Awaiting Action) */
+.status-pending {
+    background-color: #ffc107; /* Yellow/Amber */
+    color: #343a40; 
+}
+
+/* Confirmed (Ready to Go) */
+.status-confirmed {
+    background-color: #28a745; /* Green */
+    color: white;
+}
+
+/* Completed (Success/Past Event) */
+.status-completed {
+    background-color: #6c757d; /* Gray */
+    color: white;
+}
+
+/* Cancelled (Failed/Deleted) */
+.status-cancelled {
+    background-color: #dc3545; /* Red */
+    color: white;
+}
+
+/* --- DFD 14.0 Admin Reservation Status Selector Styling --- */
+
+/* Base styling for the dropdown */
+.status-selector {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    appearance: none; /* Remove default OS styling for a cleaner look */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200%20-13.2%20-6.2H18.6a17.6%2017.6%200%200%200%20-13.2%206.2A17.6%2017.6%200%200%200%200%2082.5c0%204.6%201.7%209.3%205.2%2012.8l128%20127.9c3.9%203.9%209.1%206%2014.1%206s10.2%20-2.1%2014.1%20-6l128%20-127.9c3.5%20-3.5%205.2%20-8.2%205.2%20-12.8%200%20-4.6%20-1.7%20-9.3%20-5.2%20-12.8z%22%2F%3E%3C%2Fsvg%3E'); /* Custom arrow icon */
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 10px;
+    padding-right: 30px; /* Space for the custom arrow */
+    min-width: 130px; /* Ensures all statuses fit */
+}
+
+/* Color Coding based on the classes applied in script.js */
+.status-selector.status-pending {
+    background-color: #ffc107; /* Yellow/Amber */
+    color: #343a40; 
+}
+.status-selector.status-confirmed {
+    background-color: #28a745; /* Green */
+    color: white;
+}
+.status-selector.status-cancelled {
+    background-color: #dc3545; /* Red */
+    color: white;
+}
+.status-selector.status-completed {
+    background-color: #6c757d; /* Gray */
+    color: white;
+}
+/* Ensure option text is readable regardless of selector background */
+.status-selector option {
+    background: white; /* Make option backgrounds neutral */
+    color: #343a40;
+}
+

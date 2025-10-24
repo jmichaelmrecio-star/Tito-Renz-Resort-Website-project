@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QReserve: Admin Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific styling for the dashboard table */
+        #dashboard-area {
+            background-color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .reservation-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .reservation-table th, .reservation-table td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        .reservation-table th {
+            background-color: #e9ecef;
+            color: var(--text-color);
+        }
+        .status-checked-in {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        .status-pending {
+            color: orange;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <h1><a href="index.html" style="color: white; text-decoration: none;">Tito Renz Resort </a></h1>
+            <ul>
+                </ul>
+        </nav>
+    </header>
+
+    <main>
+
+        <section id="schedule-management" class="container card-grid">
+            <div class="card" style="padding: 20px;">
+                <h2>🗓️ Manage Resort Schedule</h2>
+                <p>Block dates for maintenance, holidays, or full capacity.</p>
+                <form id="blockDateForm" style="margin-top: 15px;">
+                    <div class="form-group" style="display: flex; gap: 20px;">
+                        <div style="flex: 1;">
+                            <label for="blockDate">Block START Date (YYYY-MM-DD):</label>
+                            <input type="date" id="blockDate" required>
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="blockEndDate">Block END Date (YYYY-MM-DD):</label>
+                            <input type="date" id="blockEndDate" required> 
+                        </div>
+                    </div>
+
+                    <h4>Select Service(s) to Block (Select None for ALL):</h4>
+                    <div id="serviceCheckboxes" class="checkbox-group">
+                        </div>
+                    
+                    <label for="blockReason">Reason for unavailability:</label>
+                    <input type="text" id="blockReason" name="blockReason" placeholder="e.g., Major Pool Maintenance" required>
+                    
+                    <button type="submit" class="button-primary" style="margin-top: 10px;">Block Date</button>
+                </form>
+                
+                <h3 style="margin-top: 20px;">Currently Blocked Dates:</h3>
+                <ul id="blockedDatesList" style="list-style: none; padding-left: 0;">
+                    </ul>
+            </div>
+        </section>
+
+        <section id="promotions-management" class="admin-section">
+            <h2>2. Promotions and Discount Management</h2>
+            
+            <h3>Create New Discount Code</h3>
+            <form id="createPromotionForm">
+                <div class="form-group">
+                    <label for="promoCode">Code Name :</label>
+                    <input type="text" id="promoCode" required pattern="[A-Z0-9]+" title="Use uppercase letters and numbers only.">
+                </div>
+                <div class="form-group">
+                    <label for="promoDiscount">Discount Percentage (e.g., 10 for 10%):</label>
+                    <input type="number" id="promoDiscount" required min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label for="promoExpires">Expiration Date:</label>
+                    <input type="date" id="promoExpires" required>
+                </div>
+                <br>
+                
+                <button type="submit" class="button-primary">Create Discount Code</button>
+            </form>
+
+            <br>
+
+            <h3>Active Discount Codes</h3>
+            <ul id="promotionsList">
+                </ul>
+        </section>
+        <br>
+        
+        <section id="dashboard-area">
+            <div class="dashboard-nav" style="display: flex; gap: 10px; margin-bottom: 2rem; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
+                <a href="admin-dashboard.html" class="button-primary">Reservations </a>
+                <a href="user-management.html" class="button-primary" style="background-color: #6c757d;">User Accounts </a>
+                <button onclick="alert('Simulation: Updating service prices, rules, and resort announcements.')" class="button-primary" style="background-color: #ffc107;">Website Settings</button>
+            </div>
+            <div class="dashboard-header">
+                <h2>Admin: Reservation Management </h2>
+                <div>
+                    <button id="report-button" class="button-primary">Generate Report </button>
+                </div>
+            </div>
+            
+            <p>This table displays all reservations stored in the browser's local memory for demonstration purposes.</p>
+
+            <table class="reservation-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Guests</th>
+                        <th>Service</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="reservation-list">
+                    </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section contact-info">
+                <h3>Tito Renz Resort</h3>
+                <p>Your seamless booking experience starts here.</p>
+                <p>📍 Norzagaray, Bulacan, Philippines</p>
+                <p>📞 0977 246 8920 or 0916 640 3411</p>
+                <p>📧 titorenznorzagaray@gmail.com</p>
+            </div>
+
+            <div class="footer-section quick-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="services-list.html">Reserve Now</a></li>
+                    <li><a href="checkin-demo.html">Check-in Demo</a></li>
+                    <li><a href="admin-dashboard.html">Admin Dashboard</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section about-contact">
+                <h3>About & Contact</h3>
+                <ul>
+                    <li><a href="about.html">Our Story</a></li>
+                    <li><a href="contact.html">Send Us a Message</a></li>
+                    <li><a href="help.html">Help / Guides</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 QReserve Project - All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

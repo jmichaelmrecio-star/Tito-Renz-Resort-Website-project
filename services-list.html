@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QReserve: Select Room or Venue</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* CSS for Service Cards */
+        #service-list-area {
+            text-align: center;
+            padding-bottom: 3rem;
+        }
+        #service-cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 2rem;
+        }
+        .service-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: left;
+        }
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        .service-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .card-content {
+            padding: 1.5rem;
+        }
+        .card-content h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        .card-content .price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #dc3545; /* Price highlight */
+        }
+
+        /* --- Modal (Pop-up) Styles --- */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; 
+            padding: 25px;
+            border-radius: var(--border-radius);
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.3s;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-button:hover, .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #modal-proceed-button {
+            margin-top: 20px;
+            width: 100%;
+        }
+        #search-summary {
+            background-color: #e9f7ef;
+            color: #386641;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 1.5rem;
+            font-weight: bold;
+        }
+                /* --- NEW CSS for Layout and Sidebar --- */
+        .booking-layout-container {
+            display: flex;
+            gap: 30px; /* Space between the two columns */
+            align-items: flex-start; /* Keep the sidebar at the top */
+            margin-top: 2rem;
+        }
+
+        #service-cards-container {
+            /* Takes up 2/3 of the space */
+            flex: 2; 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        #booking-summary-sidebar {
+            /* Takes up 1/3 of the space */
+            flex: 1; 
+            position: sticky; /* Keep it visible while scrolling */
+            top: 20px; /* Offset from the top of the viewport */
+            background-color: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .summary-details p:last-child {
+            margin-top: 5px;
+        }
+
+        .summary-total {
+            text-align: center;
+            padding: 10px 0;
+            border-top: 1px dashed #ccc;
+        }
+
+        .button-primary.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        /* Ensure the grid gap is still applied if you used it previously: */
+        /* #service-cards-container { ... gap: 25px; ... } */
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <h1><a href="index.html" style="color: white; text-decoration: none;">Tito Renz Resort </a></h1>
+            <ul>
+                </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div id="promo-banner" style="display: none; text-align: center; padding: 10px; background-color: var(--color-accent); color: white; margin-bottom: 20px;">
+        </div>
+        <section id="service-list-area" class="container">
+            <h2>Select Your Room or Venue</h2>
+            
+            <div id="search-summary">
+                Viewing availability for: <span id="dates-display">...</span> | Guests: <span id="guests-display">...</span>
+            </div>
+            <p>Click on any service card below to view details and proceed with your reservation (DFD 4.0).</p>
+
+            <div class="booking-layout-container">
+                <div id="service-cards-container">
+                </div>
+
+                <aside id="booking-summary-sidebar">
+                    <h3>Booking Summary</h3>
+                    <div class="summary-details">
+                        <p style="font-weight: bold;">Dates:</p>
+                        <p id="summary-dates">Sep 30, 2025 - Oct 04, 2025</p>
+                    </div>
+                    
+                    <div class="summary-details" style="margin-top: 15px;">
+                        <p style="font-weight: bold;">Selected Room:</p>
+                        <p id="summary-room">No room selected yet</p>
+                    </div>
+
+                    <hr style="margin: 15px 0;">
+
+                    <div class="summary-total">
+                        <p style="font-size: 1.1rem; font-weight: bold; color: var(--primary-color);">Total Charge (Simulated):</p>
+                        <p id="summary-price" style="font-size: 1.5rem; font-weight: bold; color: #dc3545;">P0.00</p>
+                    </div>
+
+                    <a href="#" class="button-primary disabled" id="sidebar-proceed-button" style="width: 100%; margin-top: 20px;" onclick="alert('Please select a room first!'); return false;">Continue Booking</a>
+
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <div id="serviceModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 id="modal-name">Service Name</h2>
+            <p>Price: <span id="modal-price" style="font-weight: bold;"></span></p>
+            <p id="modal-description" style="margin-top: 15px;"></p>
+            <a href="#" id="modal-proceed-button" class="button-primary">Proceed to Reservation Form</a>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section contact-info">
+                <h3>Tito Renz Resort</h3>
+                <p>Your seamless booking experience starts here.</p>
+                <p>📍 Norzagaray, Bulacan, Philippines</p>
+                <p>📞 0977 246 8920 or 0916 640 3411</p>
+                <p>📧 titorenznorzagaray@gmail.com</p>
+            </div>
+
+            <div class="footer-section quick-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="services-list.html">Reserve Now</a></li>
+                    <li><a href="checkin-demo.html">Check-in Demo</a></li>
+                    <li><a href="admin-dashboard.html">Admin Dashboard</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section about-contact">
+                <h3>About & Contact</h3>
+                <ul>
+                    <li><a href="about.html">Our Story</a></li>
+                    <li><a href="contact.html">Send Us a Message</a></li>
+                    <li><a href="help.html">Help / Guides</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 QReserve Project - All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

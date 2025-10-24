@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tito Renz Norzagaray Resort</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1><a href="index.html" style="color: white; text-decoration: none;">Tito Renz Resort</a></h1>
+            <ul>
+                </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero-new">
+            <div class="hero-content-wrapper">
+                <h1>Tito Renz Norzagaray Resort</h1>
+                <p class="tagline">Escape to Serenity: Modern Reservation, Timeless Relaxation.</p>
+                
+                <div class="quick-facts">
+                    <span>✅ QR Code Check-in Ready</span>
+                    <span>✅ Family Cottages & Rooms</span>
+                    <span>✅ Day Tour & Overnight Stays</span>
+                </div>
+                
+                <a href="services-list.html" class="button-secondary">View Rooms & Book Now</a>
+            </div>
+        </section>
+
+        <section id="quick-search-bar" class="container" style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); margin-top: 1rem; margin-bottom: 2rem;">
+            <h3 style="margin-top: 0; color: var(--primary-color);">Check Availability & Book Now</h3>
+            <form id="quickSearchForm" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
+                <div style="flex: 1; min-width: 150px;">
+                    <label for="searchCheckin" style="font-weight: bold;">Check-in Date:</label>
+                    <input type="date" id="searchCheckin" name="searchCheckin" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div style="flex: 1; min-width: 150px;">
+                    <label for="searchCheckout" style="font-weight: bold;">Check-out Date:</label>
+                    <input type="date" id="searchCheckout" name="searchCheckout" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div style="flex: 1; min-width: 100px;">
+                    <label for="searchGuests" style="font-weight: bold;">Guests:</label>
+                    <input type="number" id="searchGuests" name="searchGuests" min="1" value="1" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <button type="submit" class="button-primary" style="padding: 10px 20px; flex-shrink: 0;">Search & Reserve</button>
+            </form>
+        </section>
+        <section id="featured-amenities" class="container">
+            <h2>Our Featured Amenities</h2>
+            <p class="section-tagline">Everything you need for a perfect escape is right here.</p>
+            
+            <div class="amenities-grid">
+                <div class="amenity-card">
+                    <span class="icon" style="font-size: 2rem;">🏊</span>
+                    <h3>Large Resort Pool</h3>
+                    <p>Enjoy our main pool and pavilion area, perfect for day tours and private rentals.</p>
+                </div>
+                
+                <div class="amenity-card">
+                    <span class="icon" style="font-size: 2rem;">🍽️</span>
+                    <h3>The Dining Hall</h3>
+                    <p>Freshly prepared Filipino and international meals served all day long.</p>
+                </div>
+                
+                <div class="amenity-card">
+                    <span class="icon" style="font-size: 2rem;">🛋️</span>
+                    <h3>Guest Lounge</h3>
+                    <p>A comfortable and quiet area for relaxation, reading, or casual meetings.</p>
+                </div>
+
+                <div class="amenity-card">
+                    <span class="icon" style="font-size: 2rem;">📶</span>
+                    <h3>High-Speed WiFi</h3>
+                    <p>Stay connected across the entire resort property, included with all stays.</p>
+                </div>
+            </div>
+            <a href="services-list.html" class="button-primary" style="margin-top: 2rem;">View Rooms & Amenities</a>
+        </section>
+
+        <section id="resort-dining">
+            <div class="container dining-flex">
+                <div class="dining-content">
+                    <span class="section-label">OUR KITCHEN</span>
+                    <h2>Savor the Serenity</h2>
+                    <p>Satisfy your cravings with our in-house dining options. We offer a mix of local favorites and classic international dishes, perfect for fueling up before an exciting day or unwinding after a long swim.</p>
+                    <p>Our Poolside Bar is also open for refreshing drinks and light snacks.</p>
+                    <a href="#href" class="button-secondary">View Menu</a>
+                </div>
+                <div class="dining-image">
+                    <img src="images/bulalo.jpg" alt="Resort Dining Area">
+                </div>
+            </div>
+        </section>
+
+        <section id="services">
+            <h2>What We Offer at Tito Renz Resort</h2>
+            <div class="service-cards">
+                <div class="card">
+                    <h3>Standard Rooms</h3>
+                    <p>Comfortable and modern air-conditioned rooms perfect for individuals or couples. Enjoy a restful stay with all essential amenities.</p>
+                    <p class="price">Starts at P2,500</p>
+                </div>
+                <div class="card">
+                    <h3>Family Cottages</h3>
+                    <p>Spacious, private cottages ideal for family gatherings or larger groups. Includes a dedicated dining area and dedicated grill area.</p>
+                    <p class="price">Starts at P4,000</p>
+                </div>
+                <div class="card">
+                    <h3>Pool Area Rental</h3>
+                    <p>Reserve our main pool and pavilion area for birthdays, team building, or other special events. Perfect for large groups.</p>
+                    <p class="price">Inquire for Pricing</p>
+                </div>
+            </div>
+        </section>
+
+        </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section contact-info">
+                <h3>Tito Renz Resort</h3>
+                <p>Your seamless booking experience starts here.</p>
+                <p>📍 Norzagaray, Bulacan, Philippines</p>
+                <p>📞 0977 246 8920 or 0916 640 3411</p>
+                <p>📧 titorenznorzagaray@gmail.com</p>
+            </div>
+
+            <div class="footer-section quick-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="services-list.html">Reserve Now</a></li>
+                    <li><a href="checkin-demo.html">Check-in Demo</a></li>
+                    <li><a href="admin-dashboard.html">Admin Dashboard</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section about-contact">
+                <h3>About & Contact</h3>
+                <ul>
+                    <li><a href="about.html">Our Story</a></li>
+                    <li><a href="contact.html">Send Us a Message</a></li>
+                    <li><a href="help.html">Help / Guides</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 QReserve Project - All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
