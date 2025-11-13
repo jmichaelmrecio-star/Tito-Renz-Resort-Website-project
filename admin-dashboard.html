@@ -55,6 +55,16 @@
 
     <main>
 
+        <section id="admin-actions" class="container" style="margin-top: 20px;">
+            <h3>Management Shortcuts:</h3>
+            <ul>
+                <li><a href="#schedule-management">Manage Schedule</a></li>
+                <li><a href="#user-management">Manage Users</a></li>
+                <li><a href="#dashboard-area">Manage Reservations</a></li>
+                <li><a href="#nav-promocodes">Manage Promo Codes</a></li> 
+            </ul>
+        </section>
+
         <section id="schedule-management" class="container card-grid">
             <div class="card" style="padding: 20px;">
                 <h2>🗓️ Manage Resort Schedule</h2>
@@ -86,49 +96,99 @@
                     </ul>
             </div>
         </section>
-
-        <section id="promotions-management" class="admin-section">
-            <h2>2. Promotions and Discount Management</h2>
-            
-            <h3>Create New Discount Code</h3>
-            <form id="createPromotionForm">
-                <div class="form-group">
-                    <label for="promoCode">Code Name :</label>
-                    <input type="text" id="promoCode" required pattern="[A-Z0-9]+" title="Use uppercase letters and numbers only.">
-                </div>
-                <div class="form-group">
-                    <label for="promoDiscount">Discount Percentage (e.g., 10 for 10%):</label>
-                    <input type="number" id="promoDiscount" required min="1" max="100">
-                </div>
-                <div class="form-group">
-                    <label for="promoExpires">Expiration Date:</label>
-                    <input type="date" id="promoExpires" required>
-                </div>
-                <br>
-                
-                <button type="submit" class="button-primary">Create Discount Code</button>
-            </form>
-
-            <br>
-
-            <h3>Active Discount Codes</h3>
-            <ul id="promotionsList">
-                </ul>
-        </section>
         <br>
+
+        <!-- NEW PROMO CODE PANE -->
+        <div class="tab-pane fade" id="nav-promocodes" role="tabpanel" aria-labelledby="nav-promocodes-tab">
+            <h2>Promo Code Management</h2>
+ 
+            <!-- 1. Creation Form -->
+            <div class="card mb-4 p-4">
+                <h4>Create New Promo Code</h4>
+                <form id="createPromoCodeForm">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="promoCodeInput" class="form-label">Code (e.g., SUMMER10)</label>
+                            <input type="text" class="form-control" id="promoCodeInput" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="discountPercentageInput" class="form-label">Discount (%)</label>
+                            <input type="number" class="form-control" id="discountPercentageInput" min="1" max="100" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="expirationDateInput" class="form-label">Expiration Date</label>
+                            <input type="date" class="form-control" id="expirationDateInput" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="minPurchaseAmountInput" class="form-label">Min Purchase (₱)</label>
+                            <input type="number" class="form-control" id="minPurchaseAmountInput" min="0" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="usageLimitInput" class="form-label">Usage Limit</label>
+                            <input type="number" class="form-control" id="usageLimitInput" min="1" value="50">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Create Code</button>
+                    <p id="promoCodeMessage" class="mt-2"></p>
+                </form>
+            </div>
+ 
+            <!-- 2. Display Table -->
+            <h4>Existing Promo Codes</h4>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Discount</th>
+                            <th>Expires</th>
+                            <th>Min Purchase</th>
+                            <th>Used / Limit</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="promoCodeTableBody">
+                        <!-- Data will be inserted here by JavaScript -->
+                        <tr><td colspan="6" class="text-center">Loading promo codes...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- END NEW PROMO CODE PANE -->
+        <br>
+
+        <section id="user-management" class="admin-section" style="margin-bottom: 30px;">
+            <h2>Admin: User Accounts Management</h2>
+            <p>List of all accounts registered in the database. Use this section to manage roles and accounts.</p>
+            
+            <div class="table-container">
+                <table class="reservation-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Contact</th>
+                            <th>Role (ID)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr><td colspan="6" style="text-align: center;">Loading User Accounts...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
         
         <section id="dashboard-area">
-            <div class="dashboard-nav" style="display: flex; gap: 10px; margin-bottom: 2rem; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
-                <a href="admin-dashboard.html" class="button-primary">Reservations </a>
-                <a href="user-management.html" class="button-primary" style="background-color: #6c757d;">User Accounts </a>
-                <button onclick="alert('Simulation: Updating service prices, rules, and resort announcements.')" class="button-primary" style="background-color: #ffc107;">Website Settings</button>
-            </div>
             <div class="dashboard-header">
                 <h2>Admin: Reservation Management </h2>
                 <div>
                     <button id="report-button" class="button-primary">Generate Report </button>
                 </div>
             </div>
+
+
             
             <p>This table displays all reservations stored in the browser's local memory for demonstration purposes.</p>
 

@@ -1,87 +1,89 @@
-// --- Global Service Data ---
+// --- Global Service Data (UPDATED to match the card rendering logic) ---
 const resortServices = [
     {
-        id: 'std_room_1', // Changed from 'std_room'
-        name: 'Standard Room 1', // Changed for clarity
+        id: 'std_room_1',
+        name: 'Standard Room 1',
         price: 2500.00,
         description: 'Comfortable, air-conditioned rooms perfect for individuals or couples. Ideal for a short, restful stay with essential amenities.',
-        image: 'room.jpg' 
+        image: 'images/room.jpg'
     },
     {
-        id: 'std_room_2', // Changed from 'std_room'
+        id: 'std_room_2',
         name: 'Standard Room 2',
-        price: 3000.00, // Adjusted price to make it distinct
+        price: 3000.00,
         description: 'A larger standard room with a better view and slightly higher price point.',
-        image: 'standard room 2.jpg'
+        image: 'images/standard room 2.jpg'
     },
     {
-        id: 'family_cottage_1', // Changed from 'family_cottage'
+        id: 'family_cottage_1',
         name: 'Family Cottage 1',
         price: 4000.00,
         description: 'Spacious and private cottages designed for larger groups or families. Includes dedicated dining space and outdoor grill access.',
-        image: 'cottage.jpg'
+        image: 'images/cottage.jpg'
     },
     {
-        id: 'family_cottage_2', // Changed from 'family_cottage'
+        id: 'family_cottage_2',
         name: 'Family Cottage 2',
-        price: 4500.00, // Adjusted price to make it distinct
+        price: 4500.00,
         description: 'A premium family cottage with a small private deck.',
-        image: 'cottage.jpg'
+        image: 'images/cottage.jpg'
     },
     {
         id: 'pool_rental',
         name: 'Pool Area Rental',
         price: 8000.00,
         description: 'Book our main pool and pavilion area for private events, parties, or large gatherings. Full-day access and exclusive use.',
-        image: 'pool.jpg'
+        image: 'images/pool.jpg'
     },
 ];
+// --- END Global Service Data ---
 
 // --- Global Menu Data (DFD 13.0) ---
 const resortMenu = [
-    { 
-        name: 'Adobo Flakes', 
-        price: 350.00, 
-        description: 'Crispy pork flakes seasoned with traditional adobo sauce, served with garlic rice and fried egg.', 
-        // 👇 CHANGE THIS LINE to point to your image folder and file name
-        image: 'images/adobo.jpg' 
+    {
+        name: 'Adobo Flakes',
+        price: 350.00,
+        description: 'Crispy pork flakes seasoned with traditional adobo sauce, served with garlic rice and fried egg.',
+        image: 'images/adobo.jpg'
     },
-    { 
-        name: 'Bulalo Soup', 
-        price: 480.00, 
-        description: 'Rich and hearty beef marrow stew slow-cooked with corn, cabbage, and beans. A Filipino classic.', 
-        // 👇 CHANGE THIS LINE
-        image: 'images/bulalo.jpg' 
+    {
+        name: 'Bulalo Soup',
+        price: 480.00,
+        description: 'Rich and hearty beef marrow stew slow-cooked with corn, cabbage, and beans. A Filipino classic.',
+        image: 'images/bulalo.jpg'
     },
-    { 
-        name: 'Classic Burger', 
-        price: 280.00, 
-        description: 'A juicy 1/3 lb beef patty with lettuce, tomato, and our special sauce on a toasted bun.', 
-        // 👇 CHANGE THIS LINE
-        image: 'images/burger.jpg' 
+    {
+        name: 'Classic Burger',
+        price: 280.00,
+        description: 'A juicy 1/3 lb beef patty with lettuce, tomato, and our special sauce on a toasted bun.',
+        image: 'images/burger.jpg'
     },
     // ... continue this pattern for all dishes
 ];
 // --- END Menu Data ---
 
 // --- Global Data Store Simulation (Replaces Database) ---
-// Initialize reservations array from localStorage or as an empty array
+// ** NOTE: This variable is now OUTDATED. Data persistence is handled by the API. **
 let reservations = JSON.parse(localStorage.getItem('qreserve_reservations')) || [];
+
 // --- NEW DATA STORE: Promotions and Discounts ---
 let promotions = JSON.parse(localStorage.getItem('qreserve_promotions')) || [];
 
-// --- NEW DATA STORE: Users (For Authentication) ---
-let users = JSON.parse(localStorage.getItem('qreserve_users')) || [
-    // Pre-populate an Admin user for testing
-    { email: 'admin@resort.com', password: 'password', firstName: 'Admin', lastName: 'User', name: 'Admin User', role: 'admin', contactNumber: 'N/A' },
-    // Pre-populate a Customer user for testing
-    { email: 'manager@resort.com', password: 'password', firstName: 'Manage', lastName: 'Renz', name: 'Manage Renz', role: 'manager', contactNumber: '09000000000' }, 
-    // Pre-populate a Customer user for testing
-    { email: 'customer@test.com', password: 'password', firstName: 'Test', lastName: 'Customer', name: 'Test Customer', role: 'customer', contactNumber: '09123456789' }
-];
-
+// --- Debounce Utility Function ---
+// Ensures a function runs only once after a delay, ignoring rapid repeated calls.
+function debounce(func, delay) {
+    let timeoutId;
+    return function(...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
+}
+// --- END Debounce Utility Function ---
 
 // Function to save the current reservations array to the browser's local storage
+// ** NOTE: This function is now OUTDATED and should be removed or refactored later. **
 function saveReservations() {
     localStorage.setItem('qreserve_reservations', JSON.stringify(reservations));
     console.log('Reservations saved to local storage:', reservations);
@@ -93,11 +95,7 @@ function savePromotions() {
     console.log('Promotions saved to local storage:', promotions);
 }
 
-// Function to save the current users array to Local Storage
-function saveUsers() {
-    localStorage.setItem('qreserve_users', JSON.stringify(users));
-    console.log('Users saved to local storage:', users);
-}
+
 
 // Function to retrieve promotions
 function getPromotions() {
@@ -107,7 +105,14 @@ function getPromotions() {
 // --- Global Role Management Functions ---
 // Function to get the current role from Local Storage (Default is 'public')
 function getCurrentRole() {
-    return localStorage.getItem('qreserve_user_role') || 'public';
+    const user = getLoggedInUser();
+    // CRITICAL FIX: Check if the user object exists AND if the role property exists
+    // We trim and lowercase it defensively, but ensure it's not null/undefined first.
+    if (user && user.role && typeof user.role === 'string') {
+        return user.role.toLowerCase().trim();
+    }
+    
+    return 'public'; // Default to public if not logged in or role is missing
 }
 
 // Function to set the user role
@@ -117,84 +122,122 @@ function setRole(role) {
 
 // Function to handle logout
 function logout() {
+    // --- CRITICAL FIXES: Remove OLD keys and add the NEW key ---
+    
+    // 1. Remove the NEW master authentication object
+    localStorage.removeItem('loggedInUser'); 
+    
+    // 2. Remove the OLD, now deprecated keys (just in case they were used elsewhere)
     localStorage.removeItem('qreserve_user_role');
-    localStorage.removeItem('qreserve_logged_user_email'); // CRITICAL: Clear the user identity
+    localStorage.removeItem('qreserve_logged_user_email'); 
+    
+    // --- Clear session storage for reservations (Keep this) ---
+    sessionStorage.removeItem('selectedServiceId');
+    sessionStorage.removeItem('selectedServiceName');
+    sessionStorage.removeItem('selectedServicePrice');
+
     alert('Logged out successfully!');
-    window.location.href = 'index.html';
+    window.location.href = 'index.html'; // Redirect to home page
 }
 
 // --- NEW AUTHENTICATION FUNCTIONS (DFD 1.0) ---
 
-// Function to handle new user registration
-function registerUser(event) {
+// --- NEW API-BASED REGISTRATION FUNCTION ---
+async function registerUser(event) {
     event.preventDefault();
-    
-    // --- UPDATED FIELD CAPTURE ---
-    const firstNameInput = document.getElementById('registerFirstName').value.trim();
-    const middleInitialInput = document.getElementById('registerMiddleInitial').value.trim() || 'N/A';
-    const lastNameInput = document.getElementById('registerLastName').value.trim();
-    const contactNumberInput = document.getElementById('registerContactNumber').value.trim();
-    // -----------------------------
-    
-    const emailInput = document.getElementById('registerEmail').value.toLowerCase().trim();
-    const passwordInput = document.getElementById('registerPassword').value;
 
-    if (users.some(user => user.email === emailInput)) {
-        alert('Registration Failed: An account with this email already exists.');
-        return;
+    const firstName = document.getElementById('registerFirstName').value.trim();
+    // Your DB has 'middle_name', not 'middleInitial', so we pass it as middle_name
+    const middle_name = document.getElementById('registerMiddleInitial').value.trim() || ''; 
+    const lastName = document.getElementById('registerLastName').value.trim();
+    const phone = document.getElementById('registerContactNumber').value.trim(); // Your DB uses 'phone'
+    const email = document.getElementById('registerEmail').value.toLowerCase().trim();
+    const password = document.getElementById('registerPassword').value;
+
+    const userData = { first_name: firstName, middle_name, last_name: lastName, email, phone, password };
+
+    try {
+        const response = await fetch('http://localhost:3000/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(`Registration Failed: ${data.message}`);
+            return;
+        }
+
+        // SUCCESSFUL REGISTRATION: Log the user in immediately (optional but convenient)
+        localStorage.setItem('loggedInUser', JSON.stringify(data.user));
+
+        alert(`Registration successful! Welcome, ${firstName}. Redirecting to profile...`);
+        window.location.href = 'profile.html';
+
+    } catch (error) {
+        console.error('Network or server connection error during registration:', error);
+        alert('An error occurred during registration. Please check the server connection.');
     }
-
-    if (passwordInput.length < 6) {
-        alert('Registration Failed: Password must be at least 6 characters.');
-        return;
-    }
-
-    const newUser = {
-        // --- NEW DATA STRUCTURE ---
-        firstName: firstNameInput,
-        middleInitial: middleInitialInput,
-        lastName: lastNameInput,
-        name: `${firstNameInput} ${middleInitialInput !== 'N/A' ? middleInitialInput + ' ' : ''}${lastNameInput}`, // Full name for display
-        contactNumber: contactNumberInput,
-        // --------------------------
-        email: emailInput,
-        password: passwordInput, 
-        role: 'customer' 
-    };
-
-    users.push(newUser);
-    saveUsers();
-    
-    // Simulate immediate login and redirect
-    setRole(newUser.role); 
-    localStorage.setItem('qreserve_logged_user_email', newUser.email);
-    
-    alert(`Registration successful! Welcome, ${newUser.name}. Redirecting to home...`);
-    window.location.href = 'index.html';
 }
 
 
-// Function to handle user login
-function loginUser(event) {
-    event.preventDefault();
+
+// --- Function to handle the login process (UPDATED IDs) ---
+async function loginUser(event) {
+    event.preventDefault(); // Stop the default form submission
+
+    // 🚨 FIX APPLIED: Using IDs from your login.html
+    const emailInput = document.getElementById('loginEmail'); 
+    const passwordInput = document.getElementById('loginPassword');
     
-    const emailInput = document.getElementById('loginEmail').value.toLowerCase().trim();
-    const passwordInput = document.getElementById('loginPassword').value;
+    const email = emailInput ? emailInput.value : '';
+    const password = passwordInput ? passwordInput.value : '';
 
-    const user = users.find(u => u.email === emailInput && u.password === passwordInput);
+    if (!email || !password) {
+        alert('Please enter both email and password.');
+        return;
+    }
 
-    if (user) {
-        // Successful login
-        setRole(user.role); // Set the role (admin, customer, or public)
-        localStorage.setItem('qreserve_logged_user_email', user.email); // Save the user's email for profile/session use
-        
-        alert(`Login successful! Welcome back, ${user.name} (${user.role}).`);
-        window.location.href = 'index.html';
-    } else {
-        // Failed login
-        alert('Login Failed: Invalid email or password.');
+    try {
+        const response = await fetch('http://localhost:3000/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }), 
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(`Login Failed: ${data.message}`);
+            return;
+        }
+
+        // --- SUCCESSFUL LOGIN ---
+
+        // 1. Store the user object in localStorage (includes the critical 'role')
+        localStorage.setItem('loggedInUser', JSON.stringify(data.user));
+
+        // 2. Redirect based on the user's role (M1/A1 Logic)
+        if (data.user.role === 'Admin' || data.user.role === 'Manager') {
+            alert(`Welcome back, ${data.user.role}! Redirecting to Admin Dashboard.`);
+            // Redirects to the Admin Dashboard page you specified
+            window.location.href = 'admin-dashboard.html'; 
+        } else {
+            alert('Login successful! Redirecting to profile.');
+            // Standard Customer login
+            window.location.href = 'profile.html';
+        }
+
+    } catch (error) {
+        console.error('Network or server connection error:', error);
+        alert('An error occurred during login. Please check the server connection.');
     }
 }
+
 
 // --- END NEW AUTHENTICATION FUNCTIONS ---
 
@@ -202,17 +245,17 @@ function loginUser(event) {
 // --- DFD 2.0 Manage Profile Functions ---
 
 /**
- * Finds the currently logged-in user object.
+ * Retrieves the currently logged-in user object from local storage.
+ * This object is placed by the API-based login/register functions.
  * @returns {object|null} The user object or null if not found.
  */
 function getLoggedInUser() {
-    const userEmail = localStorage.getItem('qreserve_logged_user_email');
-    if (!userEmail) return null;
-    
-    // Ensure the global 'users' array is up-to-date (it should be, but this is defensive)
-    let currentUsers = JSON.parse(localStorage.getItem('qreserve_users')) || [];
-    
-    return currentUsers.find(u => u.email === userEmail.toLowerCase());
+    const userJson = localStorage.getItem('loggedInUser');
+    if (!userJson) {
+        return null;
+    }
+    // Parse the stored JSON object, which includes role, email, etc.
+    return JSON.parse(userJson);
 }
 
 /**
@@ -220,9 +263,9 @@ function getLoggedInUser() {
  */
 function renderProfileDetails() {
     const user = getLoggedInUser();
-    
+
     if (!user) {
-        // If no user is found, redirect to login or show an error
+        // ... (existing redirect logic to login.html)
         const display = document.getElementById('user-info-display');
         if(display) {
              display.innerHTML = '<p style="color: red;">Not logged in. Redirecting...</p>';
@@ -234,68 +277,92 @@ function renderProfileDetails() {
     }
 
     // Display the user's details
-    document.getElementById('profile-name').textContent = user.name || `${user.firstName} ${user.lastName}`;
+    // 💡 FIX 1: Use first_name and last_name from the API object
+    const fullName = `${user.first_name} ${user.last_name}`;
+    document.getElementById('profile-name').textContent = fullName;
+    
     document.getElementById('profile-email').textContent = user.email;
-    document.getElementById('profile-contact').textContent = user.contactNumber;
-    document.getElementById('profile-role').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+
+    // 💡 FIX 2: Use 'phone' from the API object
+    document.getElementById('profile-contact').textContent = user.phone || 'N/A';
+    
+    // Assuming the user object has a 'role' property (e.g., 'Customer')
+    const roleName = user.role || 'Customer'; // Provide 'Customer' as a fallback
+    
+    const rawRole = user.role; 
+
+    if (rawRole) {
+        // Capitalize the first letter (e.g., 'customer' -> 'Customer')
+        const formattedRole = rawRole.charAt(0).toUpperCase() + rawRole.slice(1);
+        document.getElementById('profile-role').textContent = formattedRole;
+    } else {
+        // Fallback if somehow the role is missing (shouldn't happen now)
+        document.getElementById('profile-role').textContent = 'Role Not Found';
+    }
 }
 
 
 /**
- * Renders the logged-in user's reservation history.
+ * Renders the logged-in user's reservation history by fetching data from the API.
+ * CRITICAL: Requires a GET endpoint (e.g., /api/reservations/user/:email) on the backend.
  */
-function renderUserReservations() {
+async function renderUserReservations() {
     const user = getLoggedInUser();
     const list = document.getElementById('user-reservations-list');
-    
+
     if (!list || !user) {
-        // Stop if not on the profile page or if user is missing
-        return; 
+        return; // Exit if not on the profile page or if user is not logged in
     }
 
-    // Filter all reservations to find ones matching the user's email
-    // NOTE: In a real app, 'reservations' would need a 'userEmail' property.
-    // For now, we'll SIMULATE history by showing the last 5 reservations for the current user.
+    // Display a loading message while waiting for the API call
+    list.innerHTML = '<tr><td colspan="5" style="text-align: center;">Loading reservation history...</td></tr>';
     
-    // TEMPORARY: Match based on name/email until reservation object is fully updated
-    // For now, we'll SIMULATE by showing the last 5 overall, or you can use a property like 'full_name' 
-    // from the reservation object if the user used their real name during booking.
-    
-    // We'll use the last 5 as a safe, temporary simulation, as it was in your previous version, but 
-    // we'll update the table rendering to match the new profile table structure.
-    const userReservations = reservations.slice(-5).reverse(); // Show newest first
-    
-    list.innerHTML = '';
-    
-    if (userReservations.length === 0) {
-        list.innerHTML = '<tr><td colspan="5" style="text-align: center;">You have no reservations on record.</td></tr>';
-        return;
-    }
+    // CRITICAL: Construct the API URL using the logged-in user's email
+    const userEmail = user.email;
+    const apiUrl = `http://localhost:3000/api/reservations/user/${encodeURIComponent(userEmail)}`;
 
-    userReservations.forEach(res => {
-        const row = document.createElement('tr');
-                // --- UPDATED STATUS CLASS LOGIC FOR PROFILE ---
-        let statusClass = 'status-pending'; 
+    try {
+        const response = await fetch(apiUrl); // Fetch data from the new GET API
 
-        if (res.status === 'confirmed') {
-            statusClass = 'status-confirmed'; 
-        } else if (res.status === 'completed') {
-            statusClass = 'status-completed'; 
-        } else if (res.status === 'cancelled') {
-            statusClass = 'status-cancelled'; 
+        if (!response.ok) {
+            throw new Error(`Failed to fetch reservations: Server responded with status ${response.status}`);
         }
-        // ---------------------------------------------
-        const priceDisplay = res.finalTotal ? `P${res.finalTotal.toFixed(2)}` : `P${res.basePrice ? res.basePrice.toFixed(2) : 'N/A'}`;
 
-        row.innerHTML = `
-            <td>${res.id}</td>
-            <td>${res.serviceType}</td>
-            <td>${new Date(res.check_in).toLocaleDateString()}</td>
-            <td><span class="${statusClass}">${res.status}</span></td>
-            <td>${priceDisplay}</td>
-        `;
-        list.appendChild(row);
-    });
+        const userReservations = await response.json(); // Get the JSON array
+        list.innerHTML = ''; // Clear the 'Loading' message
+
+        if (userReservations.length === 0) {
+            list.innerHTML = '<tr><td colspan="5" style="text-align: center;">You have no reservations on record.</td></tr>';
+            return;
+        }
+
+        // Render the fetched data
+        userReservations.reverse().forEach(res => { // Reverse to show newest first
+            const row = document.createElement('tr');
+            
+            let statusClass = 'status-pending';
+            if (res.status === 'confirmed') {
+                statusClass = 'status-confirmed';
+            } else if (res.status === 'completed') {
+                statusClass = 'status-completed';
+            } else if (res.status === 'cancelled') {
+                statusClass = 'status-cancelled';
+            }
+
+            row.innerHTML = `
+                <td>${res.id || 'N/A'}</td>
+                <td>${res.serviceType}</td>
+                <td>${new Date(res.check_in).toLocaleDateString()}</td>
+                <td>₱${res.finalTotal.toFixed(2)}</td>
+                <td><span class="${statusClass}">${res.status.toUpperCase()}</span></td>
+            `;
+            list.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error('Error fetching user reservations:', error);
+        list.innerHTML = '<tr><td colspan="5" style="color: red; text-align: center;">Error loading reservations. Please check your Node.js API console.</td></tr>';
+    }
 }
 // --- END DFD 2.0 Manage Profile Functions ---
 
@@ -312,131 +379,125 @@ window.setRole = setRole;
 function saveUsers() {
     localStorage.setItem('qreserve_users', JSON.stringify(users));
     // Re-synchronize the global array just in case
-    window.users = users; 
+    window.users = users;
 }
 
 
-/**
- * Renders the list of users on user-management.html based on filters.
- */
-function renderUsersList() {
-    const tbody = document.getElementById('users-list-tbody');
-    const userCountDisplay = document.getElementById('user-count');
-    if (!tbody) return;
+// script.js - Updated function to fetch users from the API and render the table
+async function renderUsersList() {
+    const userTableBody = document.getElementById('users-table-body');
+    if (!userTableBody) return;
 
-    // 1. Get Filters
-    const searchTerm = document.getElementById('user-search-input')?.value.toLowerCase().trim() || '';
-    const roleFilter = document.getElementById('user-role-filter')?.value || 'all';
-
-    // Ensure 'users' array is up-to-date
-    let currentUsers = JSON.parse(localStorage.getItem('qreserve_users')) || [];
+    userTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Fetching users from API...</td></tr>';
     
-    // 2. Apply Filters
-    let filteredUsers = currentUsers.filter(user => {
-        const nameMatch = user.name.toLowerCase().includes(searchTerm);
-        const emailMatch = user.email.toLowerCase().includes(searchTerm);
-        const roleMatch = roleFilter === 'all' || user.role === roleFilter;
+    try {
+        const response = await fetch('http://localhost:3000/api/users');
         
-        return (nameMatch || emailMatch) && roleMatch;
-    });
-
-    // 3. Update User Count Display
-    if (userCountDisplay) {
-        userCountDisplay.textContent = filteredUsers.length;
-    }
-    
-    // 4. Render Table
-    tbody.innerHTML = '';
-    if (filteredUsers.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No users found matching the criteria.</td></tr>';
-        return;
-    }
-
-    filteredUsers.forEach(user => {
-        const row = document.createElement('tr');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}. Could not fetch user list.`);
+        }
         
-        // Disable actions if the user is the currently logged-in admin (prevent self-lockout)
-        const loggedInEmail = localStorage.getItem('qreserve_logged_user_email');
-        const isSelf = user.email === loggedInEmail;
-        const disableClass = isSelf ? 'disabled-action' : '';
-        const roleText = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+        const users = await response.json(); 
         
-        // Dynamic Role Selector for quick change
-        const roleSelector = `
-            <select onchange="changeUserRole('${user.email}', this.value)" ${isSelf ? 'disabled' : ''}>
-                <option value="customer" ${user.role === 'customer' ? 'selected' : ''}>Customer</option>
-                <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>Manager</option> // ADDED
-                <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-            </select>
-        `;
-
-        row.innerHTML = `
-            <td>${user.name}</td>
-            <td>${user.email}</td>
-            <td>${user.contactNumber}</td>
-            <td>${roleSelector}</td>
-            <td>
-                <button class="button-secondary ${disableClass}" 
-                        onclick="resetUserPassword('${user.email}')" 
-                        ${isSelf ? 'disabled' : ''}>
-                    Reset
-                </button>
-            </td>
-            <td>
-                <button class="button-danger ${disableClass}" 
-                        onclick="deleteUser('${user.email}')" 
-                        ${isSelf ? 'disabled' : ''}>
-                    Delete
-                </button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
-/**
- * Changes the role of a user and re-renders the list.
- * @param {string} email - The email of the user to modify.
- * @param {string} newRole - The new role ('customer' or 'admin').
- */
-function changeUserRole(email, newRole) {
-    if (!confirm(`Are you sure you want to change ${email}'s role to ${newRole.toUpperCase()}?`)) {
-        document.getElementById('user-role-filter').value = users.find(u => u.email === email).role; // Reset selector if canceled
-        renderUsersList(); // Re-render to ensure selector is correct
-        return;
-    }
-
-    // 1. Find the user and update their role in the global 'users' array
-    const userIndex = users.findIndex(u => u.email === email);
-    if (userIndex !== -1) {
-        users[userIndex].role = newRole;
-        saveUsers();
-        alert(`Role for ${email} successfully changed to ${newRole}.`);
+        // This is a temporary structure because the list only contains role_id
+        // We will need a way to map role_id to role name later, but for now, 
+        // this confirms data fetching works.
+        const roleMapping = {
+            // Add your role IDs here later (e.g., '655a...' : 'Admin')
+        };
         
-        // 2. Re-render the list to show the change
-        renderUsersList();
-        
-        // CRITICAL: If the user is viewing the page, refresh the navigation bar too
-        renderNavigation();
+        userTableBody.innerHTML = ''; // Clear the loading message
+
+        users.forEach(user => {
+            const row = userTableBody.insertRow();
+            
+            // Display User Data
+            row.insertCell().textContent = user._id; // Display the MongoDB ID temporarily
+            row.insertCell().textContent = user.first_name + ' ' + user.last_name;
+            row.insertCell().textContent = user.email;
+            row.insertCell().textContent = user.phone || 'N/A';
+            
+            // For now, display the role_id directly from the database
+            row.insertCell().textContent = user.role_id; 
+
+            // Add Actions Cell
+            const actionsCell = row.insertCell();
+            actionsCell.innerHTML = `
+                <button class="button-small button-secondary" onclick="changeUserRole('${user._id}', 'Admin')">Promote</button>
+                <button class="button-small button-danger" onclick="deleteUser('${user._id}')">Delete</button>
+            `;
+        });
+
+    } catch (error) {
+        console.error("Error loading user list:", error);
+        userTableBody.innerHTML = `<tr><td colspan="6" style="color: red; text-align: center;">Error loading users: ${error.message}</td></tr>`;
     }
 }
 
-/**
- * Deletes a user account and re-renders the list.
- * @param {string} email - The email of the user to delete.
- */
-function deleteUser(email) {
-    if (!confirm(`WARNING: Are you sure you want to permanently delete the account for ${email}?`)) {
+// script.js - Function to change a user's role via API
+async function changeUserRole(userId, newRoleName) {
+    if (!confirm(`Are you sure you want to change this user's role to ${newRoleName}? This action is immediate.`)) {
         return;
     }
     
-    // 1. Filter out the user from the global 'users' array
-    users = users.filter(user => user.email !== email);
-    saveUsers();
-    alert(`Account for ${email} has been permanently deleted.`);
+    try {
+        const response = await fetch(`http://localhost:3000/api/users/${userId}/role`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                // Future: Add Authorization header here
+            },
+            body: JSON.stringify({ newRoleName })
+        });
 
-    // 2. Re-render the list to show the deletion
-    renderUsersList();
+        if (!response.ok) {
+            // Read error message from server if available
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update user role.');
+        }
+
+        const result = await response.json();
+        alert(result.message);
+        
+        // CRITICAL: Refresh the user list table to show the new role
+        renderUsersList(); 
+
+    } catch (error) {
+        console.error('Failed to change role:', error);
+        alert(`Error: Could not change user role. ${error.message}`);
+    }
+}
+
+// script.js - Function to delete a user via API
+async function deleteUser(userId) {
+    if (!confirm("Are you sure you want to permanently delete this user? This action cannot be undone.")) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                // Future: Add Authorization header here
+            }
+        });
+
+        if (!response.ok) {
+            // Attempt to read the error message from the server response
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to delete user.');
+        }
+
+        const result = await response.json();
+        alert(result.message);
+        
+        // CRITICAL: Refresh the user list table to reflect the change
+        renderUsersList(); 
+
+    } catch (error) {
+        console.error('Failed to delete user:', error);
+        alert(`Error: Could not delete user. ${error.message}`);
+    }
 }
 
 /**
@@ -445,7 +506,7 @@ function deleteUser(email) {
  */
 function resetUserPassword(email) {
     // Generate a simple temporary password for simulation
-    const newPassword = Math.random().toString(36).slice(-8); 
+    const newPassword = Math.random().toString(36).slice(-8);
 
     if (!confirm(`Are you sure you want to reset the password for ${email}? The new password will be: ${newPassword}`)) {
         return;
@@ -453,11 +514,11 @@ function resetUserPassword(email) {
 
     // 1. Find the user and update their password in the global 'users' array
     const userIndex = users.findIndex(u => u.email === email);
-    
+
     if (userIndex !== -1) {
         // CRITICAL: Update the password in the data store
         users[userIndex].password = newPassword;
-        saveUsers(); 
+        saveUsers();
 
         alert(`Success! Password for ${email} has been reset to: ${newPassword}. (In a real system, this would be emailed to the user.)`);
     }
@@ -486,6 +547,7 @@ const navLinks = {
         { text: 'Promotions', href: 'promotions.html' }
     ]
 };
+window.changeUserRole = changeUserRole;
 
 // Re-define the dropdown toggle function to be callable externally
 function attachDropdownToggle() {
@@ -520,18 +582,18 @@ function renderNavigation() {
     const currentPath = window.location.pathname;
 
     // --- 1. ROLE ENFORCEMENT LOGIC (The Fix) ---
-    // If the user lands on an Admin page, enforce the Admin view, 
+    // If the user lands on an Admin page, enforce the Admin view,
     // overriding the potentially corrupted role from a different tab.
     if (currentPath.includes('admin-dashboard.html') || currentPath.includes('user-management.html')) {
         if (roleFromStorage !== 'public') {
             currentRoleToUse = 'admin'; // FORCE Admin links if any user is logged in
         }
-    } 
+    }
     // --- 2. REDIRECT LOGIC (Prevent logged-in user from hitting login/register) ---
     else if ((currentPath.includes('login.html') || currentPath.includes('register.html')) && roleFromStorage !== 'public') {
-         // If a logged-in user hits login/register, redirect them home
-         window.location.href = 'index.html';
-         return; 
+           // If a logged-in user hits login/register, redirect them home
+           window.location.href = 'index.html';
+           return;
     }
     // -------------------------------------------------------------------------
 
@@ -544,14 +606,14 @@ function renderNavigation() {
         roleKey = 'admin';
     }
     const links = navLinks[roleKey]; // Use the roleKey for link selection
-    
-    navUl.innerHTML = '';  
+
+    navUl.innerHTML = '';
 
     // 1. Add universal links (Home is always first)
     const homeLi = document.createElement('li');
     homeLi.innerHTML = `<a href="index.html">Home</a>`;
     navUl.appendChild(homeLi);
-    
+
     // 2. Add role-specific links
     links.forEach(link => {
         const li = document.createElement('li');
@@ -565,14 +627,14 @@ function renderNavigation() {
     navUl.appendChild(helpLi);
 
     // 4. Add Login/Profile based on status (Uses the actual stored role for status check)
-    if (roleFromStorage !== 'public') { 
+    if (roleFromStorage !== 'public') {
         // Logged-in: Show Profile Dropdown
         const profileLi = document.createElement('li');
         profileLi.classList.add('profile-dropdown');
-        
+
         profileLi.innerHTML = `
             <button id="profile-icon" class="icon-button" aria-expanded="false" aria-controls="profile-menu">
-                <span style="font-size: 1.5rem;">👤</span> 
+                <span style="font-size: 1.5rem;">👤</span>
             </button>
             <div class="dropdown-content" id="profile-menu">
                 <a href="profile.html">My Profile</a>
@@ -587,7 +649,7 @@ function renderNavigation() {
         // Logged-out: Show Login and Register
         const loginLi = document.createElement('li');
         const registerLi = document.createElement('li');
-        
+
         loginLi.innerHTML = `<a href="login.html">Login</a>`;
         registerLi.innerHTML = `<a href="register.html">Register</a>`;
 
@@ -596,111 +658,379 @@ function renderNavigation() {
     }
 }
 
-// Call renderNavigation and NEW AUTHENTICATION LISTENERS on every page load
-document.addEventListener('DOMContentLoaded', () => {
-    // --- CRITICAL: Admin Dashboard/User Management Page Access Guard (DFD 1.0) ---
-    const loggedInUser = getLoggedInUser();
+// --- NEW SERVICE SELECTION FUNCTIONS (For service-list.html) ---
 
-    // Check if we are on an admin-restricted page
-    if (document.getElementById('admin-dashboard-page') || document.getElementById('users-list-tbody')) {
-        // Check if user is NOT logged in OR if user is NOT an admin AND NOT a manager
-        if (!loggedInUser || (loggedInUser.role !== 'admin' && loggedInUser.role !== 'manager')) {
-            alert("Access Denied. You must be an Administrator or Manager to view this page.");
-            window.location.href = 'index.html'; // Redirect to home
-            return; // Stop further execution
+let currentSelectedServiceId = null;
+
+/**
+ * Updates the existing Booking Summary Sidebar on service-list.html
+ * to reflect the selected service.
+ * @param {object} service - The selected service object.
+ */
+function updateBookingSummaryDisplay(service) {
+    const sidebar = document.getElementById('booking-summary-sidebar');
+    const roomDisplay = document.getElementById('summary-room');
+    const priceDisplay = document.getElementById('summary-price');
+    const proceedButton = document.getElementById('sidebar-proceed-button');
+
+    if (!sidebar || !roomDisplay || !priceDisplay || !proceedButton) return;
+
+    // 1. Update the Selected Room Name
+    roomDisplay.textContent = service.name;
+
+    // 2. Update the Total Price
+    priceDisplay.textContent = `P${service.price.toFixed(2)}`;
+
+    // 3. Update the Proceed Button (Enable it and set the action)
+    proceedButton.classList.remove('disabled');
+    proceedButton.href = '#'; // Remove temporary placeholder link
+    proceedButton.onclick = () => {
+        selectServiceAndRedirect(service); // Use the existing redirect function
+        return false; // Prevent default link behavior
+    };
+    proceedButton.textContent = 'Continue Booking';
+
+    // NOTE: Since the sidebar is sticky, we don't need to manually set display: block,
+    // but the original logic can be modified to make it visible if it were initially hidden.
+    // For now, we assume the sidebar is always visible, just with placeholder content.
+}
+
+
+/**
+ * Renders the list of service cards onto the service-list.html page.
+ */
+function renderServiceCards() {
+    const container = document.getElementById('service-cards-container');
+    if (!container) return; // Only run on service-list.html
+
+    container.innerHTML = ''; // Clear existing content
+
+    // We use the globally defined resortServices
+    resortServices.forEach(service => {
+        const card = document.createElement('div');
+        card.classList.add('service-card');
+        card.setAttribute('data-service-id', service.id);
+
+        card.innerHTML = `
+            <img src="${service.image}" alt="${service.name}">
+            <div class="card-content">
+                <p class="price">P${service.price.toFixed(2)}</p>
+                <h3>${service.name}</h3>
+                <p>${service.description.substring(0, 70)}...</p>
+            </div>
+        `;
+
+        // Attach the click event listener to show the modal
+        card.addEventListener('click', () => {
+            showServiceModal(service.id);
+        });
+
+        container.appendChild(card);
+    });
+}
+
+/**
+ * Shows the modal popup with service details.
+ * @param {string} serviceId - The ID of the service to display.
+ */
+function showServiceModal(serviceId) {
+    const service = resortServices.find(s => s.id === serviceId);
+    const modal = document.getElementById('serviceModal');
+    if (!service || !modal) return;
+
+    currentSelectedServiceId = serviceId; // Save the ID globally
+
+    // CRITICAL NEW STEP: Update the floating booking summary
+    updateBookingSummaryDisplay(service);
+
+    // Populate Modal Details
+    document.getElementById('modal-name').textContent = service.name;
+    document.getElementById('modal-price').textContent = `P${service.price.toFixed(2)}`;
+    document.getElementById('modal-description').textContent = service.description;
+
+    // Update the "Proceed" button link
+    const proceedButton = document.getElementById('modal-proceed-button');
+    proceedButton.onclick = () => {
+        selectServiceAndRedirect(service); // Pass the entire service object
+    };
+
+    // Show Modal
+    modal.style.display = 'block';
+}
+
+/**
+ * Saves the selected service to session storage and redirects to the reservation form.
+ * @param {object} service - The selected service object.
+ */
+function selectServiceAndRedirect(service) {
+    // Save the selected service details to sessionStorage
+    sessionStorage.setItem('selectedServiceId', service.id);
+    sessionStorage.setItem('selectedServiceName', service.name);
+    sessionStorage.setItem('selectedServicePrice', service.price);
+
+    // Redirect to the reservation page
+    window.location.href = 'reserve.html';
+}
+
+// Close the modal when the close button or background is clicked (for service-list.html)
+const modal = document.getElementById('serviceModal');
+const closeButton = document.querySelector('.close-button');
+const summaryContainer = document.getElementById('floating-booking-summary'); // Added for cleanup
+
+if (modal && closeButton) {
+    closeButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
         }
+    });
+}
+
+function renderServiceSelectionSummary() {
+    // Look up the service details and display them on reserve.html
+    const serviceName = sessionStorage.getItem('selectedServiceName');
+    const servicePrice = sessionStorage.getItem('selectedServicePrice');
+    
+    // Check if the HTML elements exist before setting content
+    const serviceDisplay = document.getElementById('selectedServiceDisplay');
+    const basePriceDisplay = document.getElementById('basePriceDisplay');
+
+    if (serviceDisplay) {
+        serviceDisplay.textContent = serviceName || '(No Service Selected)';
     }
-    // --- END Access Guard ---
-
-    renderNavigation();
-
-    // --- NEW AUTHENTICATION LISTENERS ---
-    const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
-        registerForm.addEventListener('submit', registerUser);
+    // Initialize price displays to the base price
+    if (basePriceDisplay) {
+        basePriceDisplay.textContent = parseFloat(servicePrice || 0).toFixed(2);
     }
     
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', loginUser);
+    // Also initialize the final total to the base price
+    const finalTotalDisplay = document.getElementById('finalTotalDisplay');
+    if (finalTotalDisplay) {
+        finalTotalDisplay.textContent = parseFloat(servicePrice || 0).toFixed(2);
     }
-    // --- END AUTHENTICATION LISTENERS ---
-});
+    // Set discount to 0.00 on load
+    const discountDisplay = document.getElementById('discountDisplay');
+    if (discountDisplay) {
+        discountDisplay.textContent = '0.00';
+    }
+
+    // Call calculateFinalPrice to immediately set up the price fields
+    if(servicePrice) {
+        calculateFinalPrice(parseFloat(servicePrice));
+    }
+}
+// --- END NEW SERVICE SELECTION FUNCTIONS ---
+
 
 // --- NEW PROMOTION CALCULATION FUNCTION ---
-/**
- * Calculates discount and updates the total price display on reserve.html.
- * @param {number} basePrice - The service's original price.
- * @returns {object} An object containing the final total and discount value.
- */
-function calculateFinalPrice(basePrice) {
-    // Check if the required elements exist before proceeding (only runs on reserve.html)
-    const promoCodeInput = document.getElementById('promoCodeInput');
-    const promoMessage = document.getElementById('promoMessage');
-    const discountAmountDisplay = document.getElementById('discountAmount');
-    const finalTotalDisplay = document.getElementById('finalTotal');
-    const summaryBasePriceDisplay = document.getElementById('summaryBasePrice'); // Added to ensure base price is shown
+
+async function createPromoCode(event) {
+    event.preventDefault(); // Stop the form from submitting traditionally
+
+    // ✅ IDs MATCHING admin-dashboard.html
+    const code = document.getElementById('promoCodeInput').value.trim();
+    const discountPercentage = parseFloat(document.getElementById('discountPercentageInput').value);
+    const expirationDate = document.getElementById('expirationDateInput').value;
+    const minPurchaseAmount = parseFloat(document.getElementById('minPurchaseAmountInput').value) || 0;
+    const usageLimit = parseInt(document.getElementById('usageLimitInput').value) || 50;
+
+    const promoData = {
+        code,
+        // Convert the input percentage (e.g., 15) to a decimal (0.15) for your Mongoose schema
+        discountPercentage: discountPercentage / 100, 
+        expirationDate,
+        minPurchaseAmount,
+        usageLimit,
+    };
     
-    if (!finalTotalDisplay) return { finalTotal: basePrice, discountValue: 0, appliedCode: '' }; // Exit if not on reserve.html
+    // Simple validation before sending to server
+    if (!code || isNaN(discountPercentage) || !expirationDate) {
+        alert('Please fill in all required fields (Code, Discount, Expiration Date).');
+        return;
+    }
 
-    const promos = getPromotions(); 
+    try {
+        const response = await fetch('http://localhost:3000/api/promocodes/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(promoData),
+        });
 
-    let discountPercent = 0;
+        const data = await response.json();
+        
+        if (!response.ok) {
+            alert(`Creation Failed: ${data.message || 'Unknown server error.'}`);
+            return;
+        }
+
+        // Success
+        alert(`Promo code ${data.code.code} successfully created!`);
+        document.getElementById('createPromoCodeForm').reset(); // Reset form using the correct ID
+        
+        // Ensure this function exists in script.js to refresh the table
+        if (typeof renderPromoCodeTable === 'function') {
+            renderPromoCodeTable(); 
+        }
+
+    } catch (error) {
+        console.error('Network or server connection error during promo code creation:', error);
+        alert('Network error. Could not connect to server. Check if your Node.js server is running.');
+    }
+}
+
+// --- 2. FUNCTION TO FETCH AND RENDER PROMO CODES ---
+
+/**
+ * Fetches all promo codes from the API and renders them into the admin dashboard table.
+ */
+async function renderPromoCodeTable() {
+    const tableBody = document.getElementById('promoCodeTableBody');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Loading promo codes...</td></tr>';
+
+    try {
+        const response = await fetch('http://localhost:3000/api/promocodes/all'); // Call the GET route
+        if (!response.ok) {
+            throw new Error('Server error fetching promo codes.');
+        }
+
+        const codes = await response.json();
+        tableBody.innerHTML = ''; // Clear loading message
+
+        if (codes.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="6" class="text-center">No promo codes found.</td></tr>';
+            return;
+        }
+
+        codes.forEach(code => {
+            const now = new Date();
+            const expiration = new Date(code.expirationDate);
+            const isExpired = expiration < now;
+            const isFullyUsed = code.timesUsed >= code.usageLimit;
+
+            let statusText = 'Active';
+            let statusClass = 'text-success'; // Green
+
+            if (isExpired) {
+                statusText = 'Expired';
+                statusClass = 'text-danger'; // Red
+            } else if (isFullyUsed) {
+                statusText = 'Used Up';
+                statusClass = 'text-warning'; // Yellow/Orange
+            }
+
+            const row = tableBody.insertRow();
+            row.innerHTML = `
+                <td><strong>${code.code}</strong></td>
+                <td>${(code.discountPercentage * 100).toFixed(0)}% OFF</td>
+                <td>${expiration.toLocaleDateString()}</td>
+                <td>₱${code.minPurchaseAmount.toFixed(2)}</td>
+                <td>${code.timesUsed} / ${code.usageLimit}</td>
+                <td class="${statusClass}"><strong>${statusText}</strong></td>
+            `;
+        });
+
+    } catch (error) {
+        console.error('Network Error during fetching codes:', error);
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Network Error: Cannot load data. (Is Node.js running?)</td></tr>';
+    }
+}
+
+/**
+ * Fetches a single promo code from the API and checks its validity.
+ * @param {string} code - The promo code string to check.
+ * @returns {object|null} The valid promo object or null if invalid/not found.
+ */
+async function getValidPromoCode(code) {
+    if (!code || code.length < 3) {
+        document.getElementById('promoCodeMessage').textContent = '';
+        document.getElementById('promoCodeMessage').style.color = 'inherit'; // Reset color too
+        return null; 
+    }
+    
+    try {
+        const response = await fetch(`http://localhost:3000/api/promocodes/${encodeURIComponent(code)}`);
+        
+        if (!response.ok) {
+            // This captures 404 Not Found or other server errors (e.g., code expired/used up)
+            // The backend should send a helpful message via the JSON response.
+            const errorData = await response.json();
+            console.warn("Promo Code Check Failed:", errorData.message);
+            // Update the UI message if available (assuming an ID of 'promoCodeMessage' exists on reserve.html)
+            document.getElementById('promoCodeMessage').textContent = `Invalid: ${errorData.message}`;
+            document.getElementById('promoCodeMessage').style.color = 'red';
+            return null;
+        }
+
+        const promoCode = await response.json();
+        
+        // Success: Clear any error message and show success
+        document.getElementById('promoCodeMessage').textContent = 
+            `Code Applied! You receive ${(promoCode.discountPercentage * 100).toFixed(0)}% OFF.`;
+        document.getElementById('promoCodeMessage').style.color = 'green';
+        
+        return promoCode;
+
+    } catch (error) {
+        console.error('Network error during promo code lookup:', error);
+        document.getElementById('promoCodeMessage').textContent = 'Network Error. Could not verify code.';
+        document.getElementById('promoCodeMessage').style.color = 'red';
+        return null;
+    }
+}
+
+// Function to update the final total based on applied promo code
+async function calculateFinalPrice(basePrice) {
+    const promoCodeInput = document.getElementById('promoCodeInput');
+    const finalTotalDisplay = document.getElementById('finalTotalDisplay');
+    const discountDisplay = document.getElementById('discountDisplay');
+
     let finalTotal = basePrice;
     let discountValue = 0;
-    
-    // Check if the user has entered a code (or if we are running the function for the form submission)
-    const enteredCode = promoCodeInput ? promoCodeInput.value.toUpperCase().trim() : '';
+    let appliedPromo = null;
 
-    if (enteredCode) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+    if (promoCodeInput && promoCodeInput.value) {
+        // 1. Check the code's validity using the new API function
+        const promoCodeObject = await getValidPromoCode(promoCodeInput.value.trim());
 
-        const validPromo = promos.find(promo => 
-            promo.code === enteredCode && new Date(promo.expires) >= today
-        );
-
-        if (validPromo) {
-            discountPercent = validPromo.discount;
-            discountValue = (basePrice * discountPercent) / 100;
-            finalTotal = basePrice - discountValue;
-
-            if (promoMessage) {
-                promoMessage.textContent = `${validPromo.code} applied successfully! You saved ${discountPercent}%.`;
-                promoMessage.style.color = 'green';
-            }
-        } else {
-            // Check if code exists but is expired
-            const expiredPromo = promos.find(promo => promo.code === enteredCode);
-            if (promoMessage) {
-                 if (expiredPromo) {
-                    promoMessage.textContent = 'Code is valid but has expired.';
-                } else {
-                    promoMessage.textContent = 'Invalid or non-existent promotion code.';
-                }
-                promoMessage.style.color = 'red';
+        if (promoCodeObject) {
+            // 2. Check Min Purchase Amount
+            if (basePrice < promoCodeObject.minPurchaseAmount) {
+                const required = promoCodeObject.minPurchaseAmount.toFixed(2);
+                document.getElementById('promoCodeMessage').textContent = 
+                    `Invalid: Minimum purchase of ₱${required} required.`;
+                document.getElementById('promoCodeMessage').style.color = 'orange';
+                // Code is valid but not applicable, treat as no discount
+            } else {
+                // 3. Apply the discount
+                discountValue = basePrice * promoCodeObject.discountPercentage;
+                finalTotal = basePrice - discountValue;
+                appliedPromo = promoCodeObject; // Store the valid object
             }
         }
-    } else if (promoMessage) {
-        promoMessage.textContent = 'Enter a code to check availability.';
-        promoMessage.style.color = 'initial';
+    } else {
+        // If the promo input is empty, clear any message
+        document.getElementById('promoCodeMessage').textContent = '';
+        document.getElementById('promoCodeMessage').style.color = 'inherit';
     }
 
-    // Update the UI displays
-    const formatPrice = (price) => `P${price.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-
-    if (summaryBasePriceDisplay) {
-         summaryBasePriceDisplay.textContent = formatPrice(basePrice);
-    }
-    if (discountAmountDisplay) {
-        discountAmountDisplay.textContent = formatPrice(discountValue);
+    // 4. Update the UI
+    if (discountDisplay) {
+        discountDisplay.textContent = `- ₱${discountValue.toFixed(2)}`;
     }
     if (finalTotalDisplay) {
-        finalTotalDisplay.textContent = formatPrice(finalTotal);
+        finalTotalDisplay.textContent = `₱${finalTotal.toFixed(2)}`;
     }
 
-    // Return the final calculated values
-    return { finalTotal: finalTotal, discountValue: discountValue, appliedCode: enteredCode };
+    // 5. CRITICAL: Save the results to sessionStorage for use in submitReservation
+    sessionStorage.setItem('finalTotal', finalTotal.toFixed(2));
+    sessionStorage.setItem('discountValue', discountValue.toFixed(2));
+    // Save the applied promo code (or null) to persist it for the API call
+    sessionStorage.setItem('appliedPromoCode', appliedPromo ? JSON.stringify(appliedPromo) : null);
 }
 
 // --- Function to Render Public-Facing Promotions List ---
@@ -711,9 +1041,9 @@ function renderPublicPromotions() {
     const activePromos = getPromotions();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     // Filter for codes that haven't expired yet
-    const currentPromos = activePromos.filter(promo => 
+    const currentPromos = activePromos.filter(promo =>
         new Date(promo.expires) >= today
     );
 
@@ -729,7 +1059,7 @@ function renderPublicPromotions() {
                 <h3>${promo.discount}% OFF!</h3>
                 <p>Use Code:</p>
                 <div class="promo-code-box">
-                    <strong>${promo.code}</strong> 
+                    <strong>${promo.code}</strong>
                 </div>
                 <p class="expiry-text">Expires: ${promo.expires}</p>
             </div>
@@ -738,871 +1068,379 @@ function renderPublicPromotions() {
     html += '</div>';
     container.innerHTML = html;
 }
-// Ensure this runs when the promotions.html loads
-document.addEventListener('DOMContentLoaded', renderPublicPromotions);
+// Ensure this runs when the promotions.html loa
 
-// --- End of Public Promotions List Renderer ---
+// --- DFD 10.0 Reservation Submission Logic (UPDATED for Payment Split) ---
 
-
-// --- Reservation Form Submission Handler (UPDATED for UC 9: Manage Schedule & DFD 8.0: Discounts) ---
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('reservationForm');
-    const urlParams = new URLSearchParams(window.location.search);
-    const serviceId = urlParams.get('service');
-    let baseServicePrice = 0;
-
-    // --- 1. SET UP RESERVATION PAGE (reserve.html) ---
-    if (document.getElementById('reservationForm')) {
-        const currentService = resortServices.find(s => s.id === serviceId);
-        if (currentService) {
-            baseServicePrice = currentService.price;
-            document.getElementById('summaryServiceName').textContent = currentService.name;
-            
-            // Initial price calculation (to display the base price)
-            calculateFinalPrice(baseServicePrice);
-        }
-
-        // Add event listener for the APPLY button
-        const applyPromoButton = document.getElementById('applyPromoButton');
-        if (applyPromoButton) {
-            applyPromoButton.addEventListener('click', () => {
-                calculateFinalPrice(baseServicePrice); // Recalculate price on click
-            });
-        }
-    }
-
-    // --- 2. FORM SUBMISSION LOGIC ---
-    if (form) {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Stop the page from reloading
-
-            // --- 0. NEW: Check for Terms and Conditions Agreement (Existing code from our last step) ---
-            const termsCheckbox = document.getElementById('termsCheck');
-            if (!termsCheckbox || !termsCheckbox.checked) {
-                alert('RESERVATION FAILED: You must read and agree to the Terms and Conditions to proceed with the reservation.');
-                if (termsCheckbox) termsCheckbox.focus(); 
-                return; // CRITICAL: Stop submission if terms are not agreed
-            }
-            // --- END NEW CHECK ---
-
-            // 1. Get the check-in date from the form
-            const checkInDateInput = document.getElementById('checkin');
-            const checkInDateValue = checkInDateInput ? checkInDateInput.value : null; 
-            const checkInDateOnly = checkInDateValue ? checkInDateValue.split('T')[0] : null;
-
-            // --- NEW: VALIDATE DATE IS NOT IN THE PAST ---
-            const now = new Date();
-            // We use Date objects for reliable comparison
-            const selectedDateTime = new Date(checkInDateValue);
-            
-            // To be slightly generous, we compare against the start of today (midnight) 
-            // to allow same-day bookings, unless the time is crucial.
-            // If you need to strictly prevent past times, use `selectedDateTime <= now`.
-            // Let's use `selectedDateTime < now` to prevent bookings in the past.
-
-            if (selectedDateTime < now) {
-                // If the selected date/time is strictly before the current moment
-                alert('RESERVATION FAILED: The selected check-in date and time is in the past. Please choose a future date.');
-                checkInDateInput.focus();
-                return; // STOP submission if date is in the past
-            }
-            // --- END NEW DATE VALIDATION ---
-            
-            // --- UC 9: CHECK FOR BLOCKED DATES (CRITICAL NEW LOGIC) ---
-            const blockedDates = getBlockedDates(); 
-            const isBlocked = blockedDates.some(item => item.date === checkInDate);
-
-            if (isBlocked) {
-                const reason = blockedDates.find(item => item.date === checkInDate).reason;
-                alert(`RESERVATION FAILED: The chosen date (${checkInDate}) is blocked due to: ${reason}. Please select another date.`);
-                return; // STOP submission if date is blocked
-            }
-            // --- END UC 9 CHECK ---
-
-
-            // 2. Proceed with data collection (DFD 4.0)
-            const formData = new FormData(form);
-            const reservationData = {};
-
-            // Convert form data to a JavaScript object
-            formData.forEach((value, key) => {
-                reservationData[key] = value;
-            });
-
-            // 3. CAPTURE DISCOUNT DATA AND FINAL PRICE (DFD 8.0)
-            const priceData = calculateFinalPrice(baseServicePrice); // Recalculate one last time
-            
-            reservationData.basePrice = baseServicePrice;
-            reservationData.discountCode = priceData.appliedCode;
-            reservationData.discountValue = priceData.discountValue;
-            reservationData.finalTotal = priceData.finalTotal; // CRITICAL: Save the final discounted price
-            
-            // Add service details for completeness
-            reservationData.serviceId = serviceId;
-            reservationData.serviceType = resortServices.find(s => s.id === serviceId).name;
-
-            // --- CRITICAL SIMULATION LOGIC ---
-            const date = new Date();
-            const timestamp = date.getTime();
-            reservationData.id = `QRES-${timestamp}`; 
-            reservationData.dateCreated = date.toLocaleString();
-            reservationData.status = 'pending'; // New default reservation status
-
-            // 4. Generate QR Code Data (The key for Check-in Demo)
-            reservationData.qrCodeData = JSON.stringify({
-                resId: reservationData.id,
-                checkInTime: reservationData.check_in,
-                guest: reservationData.full_name || 'Guest Name Placeholder' 
-            });
-
-            // 5. Simulate Payment Confirmation (DFD 5.0)
-            reservationData.paymentStatus = 'pending'; // New default payment status
-
-            // 6. Store the data (Simulate DFD 4.0 - Create Reservation)
-            reservations.push(reservationData);
-            saveReservations();
-
-            // 7. Provide Feedback and Next Step (UC 11.0 Simulation)
-            alert(`Reservation Confirmed! \nID: ${reservationData.id} \nFinal Price: P${priceData.finalTotal.toFixed(2)} \n\nYour request is PENDING confirmation by management. A confirmation notification has been simulated.`);
-
-            // Redirect the user to a confirmation page
-            window.location.href = `checkin-demo.html?id=${reservationData.id}`;
-        });
-    }
-});
-
-// Expose the data for other pages (like the Admin Dashboard) to access
-window.qreserveReservations = reservations;
-
-// --- DFD 7.0 Check-in Simulation Logic ---
-// (No changes here, keeping your existing logic)
-document.addEventListener('DOMContentLoaded', () => {
-    // Check if we are on the check-in demo page
-    if (document.getElementById('qrcode')) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const resId = urlParams.get('id');
-        const checkinArea = document.getElementById('checkin-area');
-        const infoDisplay = document.getElementById('reservation-info');
-        const statusDisplay = document.getElementById('checkin-status');
-        const scanButton = document.getElementById('scanButton');
-
-        // 1. Retrieve the reservation data using the ID from the URL
-        const currentReservation = reservations.find(res => res.id === resId);
-
-        if (currentReservation) {
-            // Display the reservation details
-            infoDisplay.innerHTML = `Reservation ID: <strong>${currentReservation.id}</strong><br>
-                                     Guests: ${currentReservation.number_of_guests} | Service: ${currentReservation.serviceType}<br>
-                                     <span style="font-weight: bold; color: #dc3545;">TOTAL PAID: P${currentReservation.finalTotal ? currentReservation.finalTotal.toFixed(2) : currentReservation.basePrice.toFixed(2)}</span>`; // Added final total display
-
-            // 2. Generate the QR Code (Uses the qrcode.js library we added)
-            const qrData = currentReservation.qrCodeData;
-            
-            new QRCode(document.getElementById("qrcode"), {
-                text: qrData, // This is the data the scanner reads
-                width: 256,
-                height: 256,
-                colorDark : "#28a745", // Green
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
-            
-            // 3. Handle the Check-in Scan Simulation
-            if (scanButton) {
-                scanButton.addEventListener('click', () => {
-                    // Prevent repeated check-in
-                    if (currentReservation.status === 'Checked In') {
-                        alert('This guest has already been checked in!');
-                        return;
-                    }
-
-                    // Simulate staff processing the QR data (DFD 7.0)
-                    currentReservation.status = 'Checked In';
-                    currentReservation.checkInTimeActual = new Date().toLocaleString();
-                    saveReservations(); // Update local storage
-
-                    // Update the UI
-                    statusDisplay.textContent = `Status: Checked In at ${currentReservation.checkInTimeActual}`;
-                    statusDisplay.classList.remove('pending');
-                    statusDisplay.classList.add('success');
-
-                    alert(`Success! Guest ${currentReservation.id} has been checked in.`);
-                });
-            }
-
-        } else {
-            // No ID found in URL or data store
-            checkinArea.innerHTML = '<h2>Error: Reservation not found.</h2><p>Please start a new reservation.</p>';
-        }
-    }
-        // Inside document.addEventListener('DOMContentLoaded', () => { ...
-
-    // --- Dynamic Banner Logic (For services-list.html) ---
-    if (document.getElementById('promo-banner')) {
-        const banner = document.getElementById('promo-banner');
-        const promos = getPromotions();
-        const currentPromos = promos.filter(promo => new Date(promo.expires) >= new Date(new Date().toDateString()));
-
-        if (currentPromos.length > 0) {
-            // Display the first available promotion
-            const firstPromo = currentPromos[0];
-            // Note: The specific styling (e.g., span) here assumes you'll add the necessary CSS classes in style.css
-            banner.innerHTML = `🔥 <span style"; font-weight: bold; color: #ffffff >**LIMITED TIME OFFER!** Use code</span> <span style="font-weight: bold; background-color: white; color: #dc3545; padding: 2px 5px; border-radius: 3px;">${firstPromo.code}</span> <span style"font-weight: bold; color: #ffffff > for a ${firstPromo.discount}% discount!</span>`;
-            banner.style.display = 'block';
-        }
-    }
-    // --- End Dynamic Banner Logic ---
-
-    // ... (Rest of your existing DOMContentLoaded logic continues here) ...
-});
-
-// --- NEW LOGIC: Quick Search Form Handler (Index.html) ---
-// (No changes here, keeping your existing logic)
-document.addEventListener('DOMContentLoaded', () => {
-    // ... (Existing code for renderNavigation, etc.) ...
+/**
+ * Handles the submission of the reservation form (on reserve.html).
+ * This function no longer calls the API directly. It stores the reservation 
+ * details in Session Storage and redirects the user to payment.html.
+ */
+async function submitReservation(event) {
+    event.preventDefault(); // Stop the form from submitting normally
     
-    const quickSearchForm = document.getElementById('quickSearchForm');
-    if (quickSearchForm) {
-        quickSearchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
+    // 1. Get Logged-in User and Selected Service Data
+    const user = getLoggedInUser();
+    if (!user) {
+        alert('You must be logged in to make a reservation.');
+        window.location.href = 'login.html';
+        return;
+    }
 
-            const checkInDate = document.getElementById('searchCheckin').value;
-            const checkOutDate = document.getElementById('searchCheckout').value;
-            const guests = document.getElementById('searchGuests').value;
-            
-            // UC 9 Quick Check: Check if the check-in date is blocked
-            const blockedDates = getBlockedDates(); // Use the existing global function
-            const isBlocked = blockedDates.some(item => item.date === checkInDate);
+    const finalServiceId = sessionStorage.getItem('selectedServiceId');
+    const finalServiceName = sessionStorage.getItem('selectedServiceName');
+    const finalBasePrice = parseFloat(sessionStorage.getItem('selectedServicePrice')) || 0;
 
-            if (isBlocked) {
-                const reason = blockedDates.find(item => item.date === checkInDate).reason;
-                alert(`Sorry! The resort is fully booked or closed for maintenance on your check-in date (${checkInDate}) due to: ${reason}. Please choose a different start date.`);
-                return; // STOP submission if date is blocked
-            }
-
-            // If not blocked, proceed to the Services List page with the dates attached
-            window.location.href = `services-list.html?checkin=${checkInDate}&checkout=${checkOutDate}&guests=${guests}`;
-        });
+    if (!finalServiceId || isNaN(finalBasePrice)) {
+        alert('Service information is missing. Please select a service again.');
+        window.location.href = 'services-list.html';
+        return;
     }
     
-    // ... (Existing code for Admin Dashboard init, etc.) ...
-});
+    // 2. Gather form inputs
+    const checkInDateInput = document.getElementById('checkin');
+    const checkOutDateInput = document.getElementById('checkout');
+    const numberOfGuestsInput = document.getElementById('guests');
+    const promoCodeInput = document.getElementById('promoCodeInput');
 
-// --- DFD 6.0 Admin Dashboard Logic ---
-// (No major changes here, only ensuring it runs)
-document.addEventListener('DOMContentLoaded', () => {
-    const reservationList = document.getElementById('reservation-list');
-    const reportButton = document.getElementById('report-button');
-    const clearButton = document.getElementById('clear-reservations-button');
+    // Convert input values to Date objects for comparison
+    const checkInDate = new Date(checkInDateInput.value);
+    const checkOutDate = new Date(checkOutDateInput.value);
+    const now = new Date();
 
-    // --- DFD 13.0 Menu Page Init ---
-    if (document.getElementById('menu-container')) {
-        renderMenu();
+    // Reset time for comparison, only comparing the date part
+    now.setHours(0, 0, 0, 0); 
+    checkInDate.setHours(0, 0, 0, 0); 
+    
+    // Check 1: Is Check-in in the past?
+    if (checkInDate.getTime() < now.getTime()) {
+        alert("The check-in date cannot be in the past. Please select a future date.");
+        checkInDateInput.focus(); // Focus on the invalid field
+        return; // Stop the function
     }
-    // --- END DFD 13.0 Init ---
 
-    if (reservationList) {
-        // Function to render the table content
-        function renderReservations() {
-            reservationList.innerHTML = ''; // Clear existing list
+    // Check 2: Is Check-out before Check-in?
+    if (checkOutDate.getTime() <= checkInDate.getTime()) {
+        alert("The check-out date must be after the check-in date.");
+        checkOutDateInput.focus(); // Focus on the invalid field
+        return; // Stop the function
+    }
 
-            if (reservations.length === 0) {
-                reservationList.innerHTML = '<tr><td colspan="6" style="text-align: center;">No reservations found in the local database. Please create one!</td></tr>';
-                return;
-            }
+    // 3. Simple Client-Side Validation
+    if (!checkInDateInput.value || !checkOutDateInput.value || !numberOfGuestsInput.value) {
+        alert('Please fill out all required fields: Check-in, Check-out, and Number of Guests.');
+        return;
+    }
+    
+    // --- 4. CRITICAL UPDATE: Calculate Final Price Asynchronously ---
+    
+    // 4A. Call the ASYNC pricing function to ensure it runs the API check 
+    // and saves the final price and discount to sessionStorage.
+    // The call must be awaited because it contains the fetch() call.
+    await calculateFinalPrice(finalBasePrice);
 
-            reservations.forEach(res => {
-                const row = document.createElement('tr');
-                // --- UPDATED STATUS CLASS LOGIC FOR ADMIN ---
-                let statusClass = 'status-pending'; 
+    // 4B. Retrieve the final, calculated values from Session Storage
+    const finalTotal = parseFloat(sessionStorage.getItem('finalTotal'));
+    const discountValue = parseFloat(sessionStorage.getItem('discountValue'));
+    const appliedPromoCodeJson = sessionStorage.getItem('appliedPromoCode');
+    // 💡 FIX: Check if the string is not 'null' before attempting JSON.parse()
+    const promoCodeUsed = 
+        appliedPromoCodeJson && appliedPromoCodeJson !== 'null' 
+        ? JSON.parse(appliedPromoCodeJson).code 
+        : null;
 
-                if (res.status === 'confirmed') {
-                    statusClass = 'status-confirmed'; 
-                } else if (res.status === 'completed') {
-                    statusClass = 'status-completed'; 
-                } else if (res.status === 'cancelled') {
-                    statusClass = 'status-cancelled'; 
-                }
-                // ---------------------------------------------
-                
-                // ...
-                // Use finalTotal if available, otherwise use basePrice
-                const priceDisplay = res.finalTotal ? `P${res.finalTotal.toFixed(2)}` : `P${res.basePrice ? res.basePrice.toFixed(2) : 'N/A'}`;
-                
-                // --- NEW: Reservation Status Selector ---
-                const statusSelector = `
-                    <select class="status-selector ${statusClass}" onchange="updateReservationStatus('${res.id}', this.value)">
-                        <option value="pending" ${res.status === 'pending' ? 'selected' : ''}>PENDING</option>
-                        <option value="confirmed" ${res.status === 'confirmed' ? 'selected' : ''}>CONFIRMED</option>
-                        <option value="cancelled" ${res.status === 'cancelled' ? 'selected' : ''}>CANCELLED</option>
-                        <option value="completed" ${res.status === 'completed' ? 'selected' : ''}>COMPLETED</option>
-                    </select>
-                `;
-                // --- END NEW STATUS SELECTOR ---
+    if (isNaN(finalTotal)) {
+        alert('Could not calculate final price. Please try again.');
+        return;
+    }
 
-                row.innerHTML = `
-                    <td>${res.id}</td>
-                    <td>${res.number_of_guests}</td>
-                    <td>${res.serviceType}</td>
-                    <td>${new Date(res.check_in).toLocaleDateString()}</td>
-                    <td>${new Date(res.check_out).toLocaleDateString()}</td>
-                    <td>${priceDisplay}</td>
-                    <td>${statusSelector}</td>
-                `;
-                reservationList.appendChild(row);
-            });
-            
-            // NOTE: We need to re-apply the status class after the selector is added to the DOM
-            // This is optional, but helps keep the dropdown styled correctly.
-            reservationList.querySelectorAll('select.status-selector').forEach(select => {
-                const currentStatus = select.value;
-                select.className = 'status-selector'; // Reset classes
-                if (currentStatus === 'pending') {
-                    select.classList.add('status-pending');
-                } else if (currentStatus === 'confirmed') {
-                    select.classList.add('status-confirmed');
-                } else if (currentStatus === 'cancelled') {
-                    select.classList.add('status-cancelled');
-                } else if (currentStatus === 'completed') {
-                    select.classList.add('status-completed');
-                }
-            });
-        }
+    // 5. Prepare the complete reservation object (State)
+    const reservationData = {
+        user_email: user.email,
+        serviceId: finalServiceId,
+        serviceType: finalServiceName, 
+        check_in: checkInDateInput.value,
+        check_out: checkOutDateInput.value,
+        guests: parseInt(numberOfGuestsInput.value),
         
-        // Initial rendering
-        renderReservations();
-    }
-
-    // Handle Generate Report button (Use Case 14.0)
-    if (reportButton) {
-        reportButton.addEventListener('click', () => {
-            alert('Simulation: Generating Report... (A PDF file containing reservation and payment data would be created and downloaded here.)');
-        });
-    }
-
-    if (clearButton) {
-        clearButton.addEventListener('click', () => {
-            const confirmed = confirm("Are you sure you want to clear ALL reservation data? This cannot be undone.");
-
-            if (confirmed) {
-                // 1. Reset the global JavaScript array
-                reservations = [];
-                
-                // 2. Clear the Local Storage item
-                localStorage.removeItem('qreserve_reservations');
-
-                // 3. Update the window's global array (important for other scripts)
-                window.qreserveReservations = reservations;
-                
-                // 4. Re-render the empty table (or show "No data" message)
-                // Note: This relies on the renderReservations function you already have!
-                if (document.getElementById('reservation-list')) {
-                    renderReservations();
-                }
-
-                alert('All reservation data has been successfully cleared!');
-            }
-        });
-    }
-
-        /**
-     * Updates the status of a specific reservation and re-renders the table.
-     * @param {string} resId - The ID of the reservation to modify.
-     * @param {string} newStatus - The new status ('pending', 'confirmed', etc.).
-     */
-    function updateReservationStatus(resId, newStatus) {
-        if (!confirm(`Are you sure you want to change Reservation ${resId} status to ${newStatus.toUpperCase()}?`)) {
-            // Re-render to ensure the selector snaps back to the original value if canceled
-            renderReservations();
-            return; 
-        }
-
-        // 1. Find the reservation and update its status
-        const reservationIndex = reservations.findIndex(res => res.id === resId);
+        // --- NEW/UPDATED Fields ---
+        basePrice: finalBasePrice, // Good to save the original price too
+        finalTotal: finalTotal,
+        discountValue: discountValue,
+        promoCodeUsed: promoCodeUsed, 
+        // -------------------------
         
-        if (reservationIndex !== -1) {
-            reservations[reservationIndex].status = newStatus;
+        // Include user contact info for easier reference on the payment page/backend
+        firstName: user.first_name,
+        lastName: user.last_name,
+        contactNumber: user.phone || 'N/A' 
+    };
 
-            // Optional: If confirmed, simulate payment confirmation
-            if (newStatus === 'confirmed') {
-                 reservations[reservationIndex].paymentStatus = 'confirmed';
-            } 
-            // Optional: If cancelled, assume refund/cancellation process starts
-            else if (newStatus === 'cancelled') {
-                reservations[reservationIndex].paymentStatus = 'cancelled'; // or 'refund_pending'
-            }
-            
-            saveReservations(); 
-            alert(`Reservation ${resId} status successfully changed to ${newStatus}.`);
-            
-            // 2. Re-render the list to show the change
-            renderReservations();
+    // 6. Store the complete state in Session Storage
+    // We only need to store the complete object once, as it contains finalTotal, discountValue, etc.
+    sessionStorage.setItem('tempReservationData', JSON.stringify(reservationData));
+
+    // 7. Success: Redirect to the payment page
+    alert('Reservation details saved. Redirecting to payment...');
+    window.location.href = 'payment.html'; 
+}
+
+// --- END DFD 10.0 Reservation Submission Logic ---
+
+// --- DFD 17.0 Payment Processing Functions (GCash) ---
+
+/**
+ * Loads the temporary reservation data and displays a summary on the payment.html page.
+ * Includes a safety check to ensure data exists before displaying.
+ */
+function displayPaymentSummary() {
+    // 1. Retrieve the NECESSARY data keys
+    const finalTotal = sessionStorage.getItem('finalTotal');
+    const serviceName = sessionStorage.getItem('selectedServiceName');
+    const reservationDataJSON = sessionStorage.getItem('tempReservationData'); // <-- CRITICAL: Get the full data object!
+    
+    // Attempt to parse the full data object
+    let reservationData = null;
+    if (reservationDataJSON) {
+        try {
+            reservationData = JSON.parse(reservationDataJSON);
+        } catch (e) {
+            console.error('Error parsing tempReservationData:', e);
         }
     }
 
-// Expose the function globally
-window.updateReservationStatus = updateReservationStatus;
-});
+    // Refined Check: If we ARE on the payment page AND CRITICAL data is missing, redirect.
+    const onPaymentPage = window.location.pathname.includes('payment.html');
+    if (onPaymentPage && (!finalTotal || !serviceName || !reservationData)) {
+        alert('Missing reservation details. Returning to reservation page.');
+        window.location.href = 'reserve.html';
+        return;
+    } else if (!onPaymentPage) {
+        // If we're not on the payment page, just exit cleanly.
+        return;
+    }
 
-// --- DFD 2.0 Manage Profile Logic (OLD SIMULATION REPLACED) ---
+    // 2. Locate Display Elements (Ensure your HTML IDs match these names)
+    const summaryServiceName = document.getElementById('serviceNameDisplay');
+    const summaryCustomerName = document.getElementById('summaryCustomerName'); // <-- Must be present in payment.html
+    const summaryFinalTotal = document.getElementById('paymentAmount');
+    const formattedPrice = `₱${parseFloat(finalTotal).toFixed(2)}`;
+
+    // 3. Display the data
+    
+    if (summaryServiceName) {
+        summaryServiceName.textContent = serviceName;
+    }
+    
+    // CRITICAL FIX: Concatenate firstName and lastName
+    if (summaryCustomerName && reservationData && reservationData.firstName && reservationData.lastName) {
+        // Combine the separate names for display
+        summaryCustomerName.textContent = `${reservationData.firstName} ${reservationData.lastName}`;
+    } else if (summaryCustomerName) {
+        // Fallback if names are missing but data is present
+        summaryCustomerName.textContent = 'Customer Data Missing';
+    }
+
+    if (summaryFinalTotal) {
+        summaryFinalTotal.textContent = formattedPrice;
+    }
+    
+    // NOTE: You can remove the 'paymentAmount' and 'paymentAmountSmall' 
+    // variables/logic unless you are using those specific IDs in your payment.html.
+    // I've standardized on the IDs used in your previous HTML review (e.g., summaryFinalTotal).
+}
+
+
+/**
+ * Handles the submission of the reservation details along with GCash payment data.
+ * This runs on the submission of the payment form on payment.html and calls the API.
+ */
+async function processGCashPayment(event) {
+    event.preventDefault(); 
+
+    const storedReservationData = sessionStorage.getItem('tempReservationData');
+    const finalTotal = sessionStorage.getItem('finalTotal');
+
+    if (!storedReservationData || !finalTotal || parseFloat(finalTotal) <= 0) {
+        alert('Error: Missing reservation or price data. Please start the reservation process again.');
+        window.location.href = 'reserve.html';
+        return;
+    }
+
+    // 1. Retrieve payment-specific data from the form
+    const gcashReferenceNumber = document.getElementById('gcashRefNumber')?.value.trim();
+    
+    if (!gcashReferenceNumber || gcashReferenceNumber.length < 10) {
+        alert('Please enter a valid GCash Reference Number (at least 10 digits).');
+        return;
+    }
+
+    // 2. Construct the final data payload
+    const finalPayload = {
+        ...JSON.parse(storedReservationData), // Contains user_email, serviceType, dates, etc.
+        finalTotal: parseFloat(finalTotal),
+        paymentMethod: 'GCash',
+        gcashReferenceNumber: gcashReferenceNumber // Sent for BE validation
+    };
+
+    // 3. Send the complete data to the API to finalize the reservation
+    try {
+        const response = await fetch('http://localhost:3000/api/reservations/finalize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(finalPayload),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(`Reservation Failed: ${data.message || 'An error occurred during finalization.'}`);
+            return;
+        }
+
+        // 4. Success! Clear temp storage and redirect to confirmation page
+        sessionStorage.removeItem('tempReservationData');
+        sessionStorage.removeItem('finalTotal');
+        sessionStorage.removeItem('selectedServiceId');
+        sessionStorage.removeItem('selectedServiceName');
+        sessionStorage.removeItem('selectedServicePrice');
+        
+        alert('Payment confirmed! Your reservation is now pending and will be reviewed shortly.');
+        // Assuming your backend returns the new reservation ID
+        window.location.href = 'confirmation.html?id=' + data.reservationId; 
+
+    } catch (error) {
+        console.error('Network or server connection error during payment finalization:', error);
+        alert('A network error occurred. Please try submitting the payment again.');
+    }
+}
+// --- END DFD 17.0 Payment Processing Functions ---
+
+// --- DOMContentLoaded Listener for dynamic logic ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if we are on the profile page
-    if (document.getElementById('user-info-display')) {
+    // Call functions that run on all pages
+    renderNavigation();
+
+    // Logic specific to service-list.html
+    const serviceListContainer = document.getElementById('service-cards-container');
+    if (serviceListContainer) {
+        renderServiceCards();
+    }
+
+    // Logic specific to profile.html
+    if (window.location.pathname.includes('profile.html')) {
         renderProfileDetails();
         renderUserReservations();
     }
-});
-// --- END DFD 2.0 Manage Profile Logic ---
 
-// At the bottom of your main DOMContentLoaded block (around line 750, or wherever your main listeners are)
-document.addEventListener('DOMContentLoaded', () => {
-    // ... (Keep all your existing listeners here) ...
-
-    // --- DFD 15.0 Admin User Management Init ---
-    if (document.getElementById('users-list-tbody')) {
-        renderUsersList();
+    // 3. Admin Dashboard only (CRITICAL)
+    if (document.getElementById('users-table-body')) { // Checking for the element you just added
+        renderUsersList(); // <--- Is this call present?
     }
-    // --- END DFD 15.0 Init ---
-});
+
+    // Logic specific to user-management.html
+    if (window.location.pathname.includes('user-management.html')) {
+        renderUsersList(); // Initial render
+        // Attach event listeners for filters/search if needed
+        document.getElementById('user-search-input')?.addEventListener('input', renderUsersList);
+        document.getElementById('user-role-filter')?.addEventListener('change', renderUsersList);
+    }
+
+    // Logic specific to promotions.html
+    if (window.location.pathname.includes('promotions.html')) {
+        renderPublicPromotions();
+    }
+
+    // Logic specific to login.html
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', loginUser);
+    }
+
+    // Logic specific to register.html
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+        registerForm.addEventListener('submit', registerUser);
+    }
 
 
+    const createForm = document.getElementById('createPromoCodeForm');
+    const promoCodesTab = document.getElementById('nav-promocodes-tab');
 
-// --- New Reservation Flow: Service Selection & Modal Logic (UPDATED) ---
-// (No changes here, keeping your existing logic)
-document.addEventListener('DOMContentLoaded', () => {
-    const cardsContainer = document.getElementById('service-cards-container');
-    const modal = document.getElementById('serviceModal');
-    const closeButton = document.querySelector('.close-button');
-    const proceedButtonModal = document.getElementById('modal-proceed-button');
-    
-    // --- NEW SIDEBAR ELEMENTS ---
-    const summaryDates = document.getElementById('summary-dates');
-    const summaryRoom = document.getElementById('summary-room');
-    const summaryPrice = document.getElementById('summary-price');
-    const sidebarProceedButton = document.getElementById('sidebar-proceed-button');
-    // --- NEW HEADER ELEMENTS ---
-    const datesDisplay = document.getElementById('dates-display');
-    const guestsDisplay = document.getElementById('guests-display');
-    const urlParams = new URLSearchParams(window.location.search);
-    
-    const checkin = urlParams.get('checkin');
-    const checkout = urlParams.get('checkout');
-    const guests = urlParams.get('guests');
+    if (createForm) {
+        // 1. Listener for creating a new promo code (Working)
+        createForm.addEventListener('submit', createPromoCode);
+    }
 
-    // String containing the date/guest parameters to be passed to reserve.html
-    const dateParams = checkin && checkout ? `&checkin=${checkin}&checkout=${checkout}&guests=${guests}` : '';
+    // 2. Initial Page Load (Recommended)
+    // Call the render function right away to load the table content when the page opens.
+    // This is necessary if the promo codes section is visible immediately.
+    if (document.getElementById('promoCodeTableBody')) {
+        renderPromoCodeTable(); 
+    }
 
-    // Function to initialize the Summary Bar and Header
-    function initializeSummary() {
-        if (checkin && checkout) {
-            const checkinDate = new Date(checkin).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            const checkoutDate = new Date(checkout).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            
-            // Header Update
-            datesDisplay.textContent = `${checkinDate} to ${checkoutDate}`;
-            guestsDisplay.textContent = guests || 'N/A';
-
-            // Sidebar Update
-            summaryDates.textContent = `${checkinDate} - ${checkoutDate}`;
-            
-        } else {
-            // Fallback if user bypasses the search bar
-            datesDisplay.textContent = 'Dates not selected';
-            guestsDisplay.textContent = 'N/A';
-            summaryDates.textContent = 'Please return to Home to search dates.';
-        }
-        
-        // Disable the sidebar button by default
-        updateSidebarSummary('No room selected yet', 0, '');
+    // 3. Listener for the tab click (Fix: Use the correct function name)
+    if (promoCodesTab) {
+        // If the Admin Dashboard uses tabs, reload the data every time the tab is clicked.
+        promoCodesTab.addEventListener('click', renderPromoCodeTable);
     }
     
-    // Function to update the sidebar when a card is selected
-    function updateSidebarSummary(roomName, price, serviceId) {
-        summaryRoom.textContent = roomName;
-        summaryPrice.textContent = `P${price.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    // --- Reservation Page Logic (reserve.html) ---
+if (window.location.pathname.includes('reserve.html')) {
+
+    // 1. CRITICAL: DEFINE THE BASE PRICE VARIABLE HERE!
+    const finalBasePrice = parseFloat(sessionStorage.getItem('selectedServicePrice'));
+    const finalServiceId = sessionStorage.getItem('selectedServiceId');
+    const finalServiceName = sessionStorage.getItem('selectedServiceName');
+    const form = document.getElementById('reservationForm'); // Get the form element
+
+    // 2. CHECK FOR MISSING DATA (The logic from the old block, now using the defined variable)
+    if (!finalServiceId || isNaN(finalBasePrice)) {
+        alert('Please select a service before reserving.');
+        // Use a short delay before redirecting to allow the alert to be seen
+        setTimeout(() => {
+            window.location.href = 'services-list.html';
+        }, 50);
+        return; // Stop execution if data is missing
+    }
+
+    // 3. DISPLAY SERVICE SUMMARY (Logic from the old block and the new function call)
+    renderServiceSelectionSummary(); // This function should handle base price display
+
+    // 4. ATTACH LISTENERS (Including the debounce logic)
+    if (form) {
+        // Attach the main form submission listener
+        form.addEventListener('submit', submitReservation);
+
+        // --- Debouncing and Promo Code Setup (The one we fixed earlier) ---
+
+        // Create the debounced version
+        const debouncedCalculatePrice = debounce(() => {
+            calculateFinalPrice(finalBasePrice);
+        }, 500); // Wait 0.5 seconds
+
+        // Attach the debounced function to the input field
+        document.getElementById('promoCodeInput')?.addEventListener('input', debouncedCalculatePrice);
+
+        // Initial price calculation on load (since renderServiceSelectionSummary might call it, too, this ensures it runs)
+        calculateFinalPrice(finalBasePrice); 
+    }
+}
+
+    // --- Payment Page Logic (payment.html) ---
+    if (window.location.pathname.includes('payment.html')) {
+        // 1. Display the summary details
+        displayPaymentSummary(); 
         
-        if (price > 0) {
-            sidebarProceedButton.classList.remove('disabled');
-            sidebarProceedButton.href = `reserve.html?service=${serviceId}${dateParams}`;
-            sidebarProceedButton.onclick = null; // Remove the alert function
-            sidebarProceedButton.textContent = 'Continue Booking';
-        } else {
-            sidebarProceedButton.classList.add('disabled');
-            sidebarProceedButton.href = '#';
-            sidebarProceedButton.onclick = () => { alert('Please select a room first!'); return false; };
-            sidebarProceedButton.textContent = 'Continue Booking';
+        // 2. Attach the listener for the GCash payment form
+        const gcashForm = document.getElementById('gcashPaymentForm');
+        if (gcashForm) {
+            // Assuming your payment form has the ID 'gcashPaymentForm' 
+            // and you have the function 'processGCashPayment' defined.
+            gcashForm.addEventListener('submit', processGCashPayment); 
         }
     }
 
-
-    if (cardsContainer) {
-        // Function to render the service cards
-        function renderServiceCards() {
-            cardsContainer.innerHTML = ''; // Clear existing content
-
-            resortServices.forEach(service => {
-                const card = document.createElement('div');
-                card.classList.add('service-card');
-                card.setAttribute('data-service-id', service.id);
-                
-                // CRITICAL FIX: Ensure images display correctly!
-                const imageUrl = service.image.startsWith('http') ? service.image : `images/${service.image}`;
-
-                card.innerHTML = `
-                    <img src="${imageUrl}" alt="${service.name} Photo"> 
-                    <div class="card-content">
-                        <h3>${service.name}</h3>
-                        <p>${service.description.substring(0, 70)}...</p>
-                        <p class="price">P${service.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
-                    </div>
-                `;
-
-                // Add click listener to show the modal
-                card.addEventListener('click', () => {
-                    // 1. Show the detail modal
-                    showServiceModal(service.id, dateParams); 
-                    // 2. Update the sidebar immediately when the user clicks the card
-                    updateSidebarSummary(service.name, service.price, service.id);
-                });
-                cardsContainer.appendChild(card);
-            });
-        }
-        
-        // Function to show the modal with service details (Updated to accept dateParams)
-        window.showServiceModal = function(serviceId, dateParams) {
-            const service = resortServices.find(s => s.id === serviceId);
-
-            if (service) {
-                document.getElementById('modal-name').textContent = service.name;
-                document.getElementById('modal-price').textContent = `P${service.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-                document.getElementById('modal-description').textContent = service.description;
-
-                // Set the link for the proceed button (passing the service ID and dateParams)
-                proceedButtonModal.href = `reserve.html?service=${service.id}${dateParams}`;
-
-                modal.style.display = 'block';
-            }
-        }
-
-        // Close modal functions
-        closeButton.onclick = () => { modal.style.display = 'none'; };
-        window.onclick = (event) => {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        };
-
-        // Initialize the new features
-        initializeSummary();
-        renderServiceCards();
-    }
 });
-
-// --- Use Case 9: Manage Schedule Logic ---
-// (No changes here, keeping your existing logic)
-function getBlockedDates() {
-    // Retrieves blocked dates from Local Storage
-    const blockedDates = localStorage.getItem('qreserve_blocked_dates');
-    return blockedDates ? JSON.parse(blockedDates) : [];
-}
-
-/**
- * Helper function to generate all dates between a start and end date (inclusive).
- * @returns {string[]} An array of date strings (YYYY-MM-DD).
- */
-function getDatesInRange(startDateStr, endDateStr) {
-    const dates = [];
-    let currentDate = new Date(startDateStr);
-    const stopDate = new Date(endDateStr);
-    
-    // Set time to midnight (00:00:00) for consistent date comparison across timezones
-    currentDate.setHours(0, 0, 0, 0);
-    stopDate.setHours(0, 0, 0, 0);
-
-    while (currentDate <= stopDate) {
-        // Format as YYYY-MM-DD
-        const year = currentDate.getFullYear();
-        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-        const day = String(currentDate.getDate()).padStart(2, '0');
-        
-        dates.push(`${year}-${month}-${day}`);
-        
-        // Move to the next day
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
-    return dates;
-}
-
-function saveBlockedDates(datesArray) {
-    // Saves the updated array back to Local Storage
-    localStorage.setItem('qreserve_blocked_dates', JSON.stringify(datesArray));
-}
-
-// --- Updated Function to render the list of blocked dates on Admin Dashboard ---
-function renderBlockedDatesList() {
-    const list = document.getElementById('blockedDatesList');
-    if (!list) return;
-
-    let dates = getBlockedDates();
-    dates.sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort by date
-
-    list.innerHTML = '';
-    
-    // Map of Service IDs to Names for display (e.g., 'std_room' -> 'Standard Room')
-    const serviceMap = resortServices.reduce((map, service) => {
-        map[service.id] = service.name;
-        return map;
-    }, {});
-
-    dates.forEach(item => {
-        const li = document.createElement('li');
-        let serviceDisplay;
-
-        if (item.services && item.services.includes('ALL')) {
-            serviceDisplay = '<span style="color: red; font-weight: bold;">ALL SERVICES</span>';
-        } else if (item.services && item.services.length > 0) {
-            // Convert IDs back to readable names
-            const names = item.services.map(id => serviceMap[id] || id);
-            serviceDisplay = names.join(', ');
-        } else {
-            // Fallback for old data or if services property is missing (should not happen with new logic)
-            serviceDisplay = 'ALL SERVICES (Default)';
-        }
-
-        li.innerHTML = `
-            <strong>${item.date}</strong> 
-            (${serviceDisplay}) - 
-            ${item.reason || 'No reason provided'} 
-            <button class="button-secondary" onclick="removeBlockedDate('${item.date}')">Unblock</button>
-        `;
-        list.appendChild(li);
-    });
-}
-
-// --- New function to dynamically render service checkboxes on admin-dashboard.html ---
-function renderServiceCheckboxes() {
-    const container = document.getElementById('serviceCheckboxes');
-    if (!container) return;
-
-    // Clear previous checkboxes
-    container.innerHTML = ''; 
-
-    // Loop through your list of services
-    resortServices.forEach(service => {
-        // --- START NEW CONTAINER DIV ---
-        const checkboxItem = document.createElement('div');
-        // CRITICAL: Add the class for CSS alignment
-        checkboxItem.classList.add('checkbox-item'); 
-        // --- END NEW CONTAINER DIV ---
-
-        const checkboxId = `service-${service.id}`;
-
-        checkboxItem.innerHTML = `
-            <input type="checkbox" id="${checkboxId}" name="service-to-block" value="${service.id}">
-            <label for="${checkboxId}">${service.name}</label>
-        `;
-
-        container.appendChild(checkboxItem);
-    });
-}
-
-// Ensure this runs when the admin dashboard loads
-document.addEventListener('DOMContentLoaded', renderServiceCheckboxes);
-
-function removeBlockedDate(dateToRemove) {
-    let dates = getBlockedDates();
-    dates = dates.filter(item => item.date !== dateToRemove);
-    saveBlockedDates(dates);
-    renderBlockedDatesList();
-}
-window.removeBlockedDate = removeBlockedDate; // Make it globally accessible for the button
-
-// At the bottom of your script.js file, find this block:
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize the list on the Admin Dashboard
-    renderBlockedDatesList();
-    renderServiceCheckboxes(); // Initialize the checkboxes
-
-    const blockForm = document.getElementById('blockDateForm');
-    if (blockForm) {
-        blockForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // 1. Get Date Range Inputs
-            const startDateInput = document.getElementById('blockDate').value;
-            const endDateInput = document.getElementById('blockEndDate').value; 
-            const reasonInput = document.getElementById('blockReason').value.trim();
-
-            const startDate = new Date(startDateInput);
-            const endDate = new Date(endDateInput);
-
-            // 2. Date Validation
-            if (startDate > endDate) {
-                alert("Error: The Block Start Date cannot be after the Block End Date.");
-                return;
-            }
-
-            // 3. Collect selected services
-            const selectedCheckboxes = Array.from(document.querySelectorAll('#serviceCheckboxes input[type="checkbox"]:checked'));
-            const selectedServices = selectedCheckboxes.map(checkbox => checkbox.value);
-            
-            // If no service is selected, default to blocking ALL
-            const servicesToBlock = selectedServices.length > 0 ? selectedServices : ['ALL'];
-            
-            // 4. Generate all dates in the range
-            const datesToBlock = getDatesInRange(startDateInput, endDateInput);
-
-            let dates = getBlockedDates(); // Get current blocked dates
-            let successfullyBlockedCount = 0;
-            
-            // 5. Loop through the dates and save a blocked entry for each
-            datesToBlock.forEach(dateStr => {
-                const dateExistsIndex = dates.findIndex(item => item.date === dateStr);
-
-                if (new Date(dateStr) < new Date(new Date().toDateString())) {
-                    return; // Skip past dates
-                }
-
-                if (dateExistsIndex !== -1) {
-                    // If the date already exists, we do nothing to prevent duplicates
-                    console.warn(`Date ${dateStr} is already blocked. Skipping.`);
-                } else {
-                    // Block the date with the selected services
-                    dates.push({ 
-                        date: dateStr, 
-                        reason: reasonInput, 
-                        services: servicesToBlock // Saves the specific room IDs
-                    });
-                    successfullyBlockedCount++;
-                }
-            });
-
-            if (successfullyBlockedCount > 0) {
-                saveBlockedDates(dates);
-                alert(`${successfullyBlockedCount} day(s) between ${startDateInput} and ${endDateInput} successfully blocked!`);
-            } else {
-                alert("No new dates were blocked (they may have been already blocked or you selected a past date).");
-            }
-            
-            renderBlockedDatesList();
-            blockForm.reset();
-            
-            // Reset the checkboxes visually after successful submission
-            document.querySelectorAll('#serviceCheckboxes input[type="checkbox"]').forEach(checkbox => {
-                checkbox.checked = false;
-            });
-        });
-    }
-});
-
-// --- Promotions Management Logic (Admin Dashboard) ---
-// (No changes here, keeping your existing logic)
-
-// Function to render the list of active promotions
-function renderPromotionsList() {
-    const list = document.getElementById('promotionsList');
-    if (!list) return;
-
-    list.innerHTML = '';
-    const activePromos = getPromotions();
-
-    if (activePromos.length === 0) {
-        list.innerHTML = '<li>No active promotions currently available.</li>';
-        return;
-    }
-
-    activePromos.forEach(promo => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-            <strong>${promo.code}</strong> 
-            (${promo.discount}%) - 
-            Expires: ${promo.expires}
-            <button class="button-secondary" onclick="deletePromotion('${promo.code}')">Delete</button>
-        `;
-        list.appendChild(li);
-    });
-}
-
-// Function to delete a promotion code
-function deletePromotion(codeToDelete) {
-    if (!confirm(`Are you sure you want to delete the promotion code: ${codeToDelete}?`)) {
-        return;
-    }
-    promotions = promotions.filter(promo => promo.code !== codeToDelete);
-    savePromotions();
-    renderPromotionsList();
-    alert(`Promotion ${codeToDelete} deleted.`);
-}
-window.deletePromotion = deletePromotion; // Make it globally accessible
-
-// Form Submission Handler
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize the list of promotions
-    renderPromotionsList(); 
-
-    const promoForm = document.getElementById('createPromotionForm');
-    if (promoForm) {
-        promoForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const codeInput = document.getElementById('promoCode').value.toUpperCase().trim();
-            const discountInput = parseInt(document.getElementById('promoDiscount').value);
-            const expiresInput = document.getElementById('promoExpires').value;
-            
-            // Basic Validation
-            if (promotions.some(promo => promo.code === codeInput)) {
-                alert(`Error: The code ${codeInput} already exists.`);
-                return;
-            }
-
-            const newPromotion = {
-                code: codeInput,
-                discount: discountInput,
-                expires: expiresInput,
-            };
-
-            promotions.push(newPromotion);
-            savePromotions();
-            
-            alert(`Promotion code ${codeInput} created successfully!`);
-            promoForm.reset();
-            renderPromotionsList();
-        });
-    }
-});
-// Inside document.addEventListener('DOMContentLoaded', ...)
-if (document.getElementById('promo-banner')) {
-    const banner = document.getElementById('promo-banner');
-    const promos = getPromotions();
-    const currentPromos = promos.filter(promo => new Date(promo.expires) >= new Date(new Date().toDateString()));
-
-    if (currentPromos.length > 0) {
-        // Display the first available promotion
-        const firstPromo = currentPromos[0];
-        banner.innerHTML = `🔥 **LIMITED TIME OFFER!** Use code <span style="font-weight: bold; background-color: white; color: #dc3545; padding: 2px 5px; border-radius: 3px;">${firstPromo.code}</span> for a ${firstPromo.discount}% discount!`;
-        banner.style.display = 'block';
-    }
-}
-
-// --- DFD 13.0 Menu Rendering Logic ---
-function renderMenu() {
-    const container = document.getElementById('menu-container');
-    if (!container) return; // Exit if not on menu.html
-
-    container.innerHTML = '';
-
-    resortMenu.forEach(dish => {
-        const card = document.createElement('div');
-        card.className = 'service-card menu-card'; // Added 'menu-card' for possible styling
-        card.innerHTML = `
-            <img src="${dish.image}" alt="${dish.name}" style="width: 100%; height: 500px; object-fit: cover;">
-            <div style="padding: 15px;">
-                <h4>${dish.name}</h4>
-                <p class="description">${dish.description}</p>
-                <p class="price">P${dish.price.toFixed(2)}</p>
-                </div>
-        `;
-        container.appendChild(card);
-    });
-}
-window.renderMenu = renderMenu;
+// --- END DOMContentLoaded Listener ---

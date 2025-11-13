@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - QReserve Resort</title>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+
+    <header>
+        <h1><a href="index.html" style="color: white; text-decoration: none;">Tito Renz Resort</a></h1>
+            <ul>
+                </ul>
+    </header>
+
+    <main class="container">
+        <h2>💰 Finalize Your Reservation Payment</h2>
+        <p>Your booking details have been saved. Please complete the payment via **GCash** to confirm your reservation.</p>
+        
+        <div class="payment-summary">
+            <h3>Reservation Summary:</h3>
+            <p>Service: <span id="serviceNameDisplay"></span></p>
+            <p>Customer Name: <span id="summaryCustomerName" style="font-weight: bold;"></span></p>
+            <p>Total Amount Due: <strong class="total-amount">₱<span id="paymentAmount">0.00</span></strong></p>
+        </div>
+
+        <form id="gcashPaymentForm">
+            <div class="form-group">
+                <label for="gcashRefNumber">GCash Reference Number:</label>
+                <input type="text" id="gcashRefNumber" placeholder="Enter 10-13 digit reference number" required>
+                <small>Please pay the amount (₱<span id="paymentAmountSmall">0.00</span>) to our official GCash number before proceeding.</small>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Submit Payment & Confirm Booking</button>
+            <a href="reserve.html" class="btn btn-secondary">Go Back to Reservation Details</a>
+        </form>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

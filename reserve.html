@@ -39,27 +39,59 @@
 	                <input type="datetime-local" id="checkout" name="checkout_date" required>
 	            </fieldset>
 
-	            <div id="payment-summary">
-				    <h3>Order Summary</h3>
-				    <p>Service Name: <span id="summaryServiceName"></span></p>
-				    <p>Base Price: <span id="summaryBasePrice"></span></p>
+	            <fieldset>
+				    <legend>3. Your Contact & Personal Details</legend>
+
+				    <label for="name">Full Name:</label>
+				    <input type="text" id="name" name="customer_name" required>
+
+				    <label for="contact">Contact Number:</label>
+				    <input type="tel" id="contact" name="customer_contact" required>
+
+				    <label for="email">Email Address:</label>
+				    <input type="email" id="email" name="customer_email" required>
+				    
+				    <label for="address">Residential Address (For Record):</label>
+				    <input type="text" id="address" name="customer_address" required>
+
+				    <label for="notes">Special Requests / Notes (Optional):</label>
+				    <textarea id="notes" name="customer_notes" rows="3"></textarea>
+				</fieldset>
+
+	            <!-- Price Summary & Promo Code Area -->
+	            <div id="price-summary" class="summary-box">
+				    <h3>Reservation Summary</h3>
+				    
+				    <div class="form-group">
+				        <label for="promoCodeInput">Have a Promo Code?</label>
+				        <div class="promo-input-group">
+				            <input type="text" id="promoCodeInput" placeholder="Enter code" class="form-control">
+				        </div>
+				        <p id="promoCodeMessage" style="margin-top: 5px; font-size: 0.9em;"></p>
+				    </div>
+				    <hr>
+
+				    <div id="summary-details">
+				        </div>
 				    
 				    <hr>
 				    
-				    <div class="form-group" style="margin-top: 15px;">
-				        <label for="promoCodeInput">Have a Discount Code?</label>
-				        <div style="display: flex; gap: 10px;">
-				            <input type="text" id="promoCodeInput" placeholder="Enter Code" style="flex-grow: 1;">
-				            <button type="button" id="applyPromoButton" class="button-secondary">Apply</button>
-				        </div>
-				        <p id="promoMessage" style="margin-top: 5px; font-size: 0.9em;"></p>
+				    <div class="summary-total">
+				        <p>Subtotal (Base Price):</p>
+				        <p>₱<span id="basePriceDisplay">0.00</span></p> 
+				    </div>
+
+				    <div id="discountRow">
+				        <p>Discount:</p>
+				        <p>- ₱<span id="discountDisplay">0.00</span></p>
 				    </div>
 				    
 				    <hr>
-				    
-				    <p style="color: green; font-weight: bold;">Discount Applied: <span id="discountAmount">P0.00</span></p>
-				    
-				    <p style="font-size: 1.2em; font-weight: bold;">TOTAL DUE: <span id="finalTotal"></span></p>
+
+				    <div id="finalTotalRow">
+				        <p style="font-weight: bold;">Total Amount Due:</p>
+				        <p style="font-weight: bold;">₱<span id="finalTotalDisplay">0.00</span></p>
+				    </div>
 				</div>
 				<br>
 
@@ -83,13 +115,6 @@
 				    </div>
 				</fieldset>
 				<br>
-
-	            <fieldset>
-	                <legend>3. Payment & Confirmation</legend>
-	                <p>Please simulate **Upload Payment Proof** by acknowledging the payment step.</p>
-	                <label for="paymentRef">GCash Reference Number (Optional for Demo):</label>
-	                <input type="text" id="paymentRef" name="payment_ref">
-	            </fieldset>
 
 	            <button type="submit" class="button-primary">Confirm & Submit Reservation</button>
 	        </form>
@@ -128,115 +153,5 @@
         </div>
     </footer>
 	<script src="script.js"></script>
-	<script>
-	    document.addEventListener('DOMContentLoaded', () => {
-	        const urlParams = new URLSearchParams(window.location.search);
-	        const serviceId = urlParams.get('service');
-	        const selectedDisplay = document.getElementById('selectedServiceDisplay');
-	        const amountDisplay = document.getElementById('amountDisplay'); // <-- NEW
-	        
-	        // NOTE: This relies on the global resortServices array from script.js
-	        const selectedService = resortServices.find(s => s.id === serviceId);
-
-	        if (selectedService) {
-	            // 1. Update the Selected Service Display
-	            selectedDisplay.textContent = `${selectedService.name} (P${selectedService.price.toLocaleString('en-US', { minimumFractionDigits: 2 })})`;
-	            
-	            // 2. Update the Total Amount Due Display (The fix you requested!)
-	            amountDisplay.textContent = `P${selectedService.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-
-	            // 3. Add hidden fields to form for submission
-	            const form = document.getElementById('reservationForm');
-	            if (form) {
-	                // Hidden input for Service Name
-	                let hiddenInput = document.createElement('input');
-	                hiddenInput.type = 'hidden';
-	                hiddenInput.name = 'serviceType';
-	                hiddenInput.value = selectedService.name;
-	                form.appendChild(hiddenInput);
-
-	                // Hidden input for Price (CRITICAL for DFD 5.0 processing)
-	                let priceInput = document.createElement('input');
-	                priceInput.type = 'hidden';
-	                priceInput.name = 'total_price';
-	                priceInput.value = selectedService.price;
-	                form.appendChild(priceInput);
-	            }
-	        } else {
-	            selectedDisplay.textContent = 'Please return to the selection page to choose a service.';
-	            amountDisplay.textContent = 'N/A';
-	        }
-	    });
-	</script><script src="script.js"></script>
-	<script>
-			document.addEventListener('DOMContentLoaded', () => {
-				 const urlParams = new URLSearchParams(window.location.search);
-				 const serviceId = urlParams.get('service');
-				 const selectedDisplay = document.getElementById('selectedServiceDisplay');
-				 const amountDisplay = document.getElementById('amountDisplay'); 
-
-		     // --- NEW: References for Date/Guest inputs ---
-		     const checkinInput = document.getElementById('checkin');
-             const checkoutInput = document.getElementById('checkout');
-             const guestsInput = document.getElementById('guests');
-
-		     // --- NEW: Read Date/Guest info from URL ---
-		     const checkinUrl = urlParams.get('checkin');
-		     const checkoutUrl = urlParams.get('checkout');
-		     const guestsUrl = urlParams.get('guests');
-
-		     if (checkinUrl && checkoutUrl) {
-		            // Pre-fill the date and guest fields using URL data
-		            // We assume a 2 PM check-in and 12 PM check-out as defaults
-		            checkinInput.value = checkinUrl + 'T14:00'; 
-		            checkoutInput.value = checkoutUrl + 'T12:00';
-		            guestsInput.value = guestsUrl;
-
-		            // Make fields read-only as the date/guest selection was already made (and validated for blocks)
-		            checkinInput.readOnly = true;
-		            checkoutInput.readOnly = true;
-		            guestsInput.readOnly = true;
-
-		            // UX: Add a visual cue that these fields are pre-filled
-		            checkinInput.style.backgroundColor = '#f0f0f0';
-		            checkoutInput.style.backgroundColor = '#f0f0f0';
-		            guestsInput.style.backgroundColor = '#f0f0f0';
-		        }
-		        // --- END NEW LOGIC ---
-
-		 // NOTE: This relies on the global resortServices array from script.js
-		 const selectedService = resortServices.find(s => s.id === serviceId);
-
-		 if (selectedService) {
-			 // 1. Update the Selected Service Display
-			 selectedDisplay.textContent = `${selectedService.name} (P${selectedService.price.toLocaleString('en-US', { minimumFractionDigits: 2 })})`;
-
-			 // 2. Update the Total Amount Due Display 
-			 amountDisplay.textContent = `P${selectedService.price.toLocaleString('en-US', { minimumFractionDigits: 2 })
-			}`;
-
-			 // 3. Add hidden fields to form for submission
-			 const form = document.getElementById('reservationForm');
-			 if (form) {
-				 // Hidden input for Service Name
-				 let hiddenInput = document.createElement('input');
-				 hiddenInput.type = 'hidden';
-				 hiddenInput.name = 'serviceType';
-				 hiddenInput.value = selectedService.name;
-				 form.appendChild(hiddenInput);
-
-				 // Hidden input for Price (CRITICAL for DFD 5.0 processing)
-				 let priceInput = document.createElement('input');
-				 priceInput.type = 'hidden';
-				 priceInput.name = 'total_price';
-				 priceInput.value = selectedService.price;
-				 form.appendChild(priceInput);
-			 	}
-			 } else {
-			 selectedDisplay.textContent = 'Please return to the selection page to choose a service.';
-			 amountDisplay.textContent = 'N/A';
-				}
-		});
-	</script>
 </body>
 </html>
