@@ -505,7 +505,7 @@ async function deleteUser(userId) {
  * NOTE: This requires a new backend API route /api/reservations/pending
  */
 async function renderAdminReservations() {
-    const list = document.getElementById('admin-reservations-list');
+    const list = document.getElementById('admin-reservation-list');
 
     // Important: We should also check the user role here to prevent public access.
     const userRole = getCurrentRole();
@@ -548,7 +548,9 @@ async function renderAdminReservations() {
 
             row.innerHTML = `
                 <tr class="${rowClass}">
-                    <td>${res._id.substring(0, 8)}...</td> <td>${res.email}</td>
+                    <td>${res._id.substring(0, 8)}...</td> 
+                    <td>${res.full_name}</td>
+                    <td>${res.email}</td>
                     <td>${res.serviceType}</td>
                     <td>${new Date(res.check_in).toLocaleDateString()}</td>
                     <td>₱${res.finalTotal.toFixed(2)}</td>
@@ -575,37 +577,66 @@ async function renderAdminReservations() {
 }
 
 /**
- * Placeholder function for confirming a reservation status (Pending -> Confirmed).
- * We will fully implement the API call here in the next step.
- * @param {string} reservationId - The ID (_id) of the reservation to confirm.
+ * Sends a request to the API to change a reservation status to 'Confirmed'.
  */
-function confirmReservation(reservationId) {
-    // We will implement the PUT API call here next!
-    console.log('Attempting to confirm reservation:', reservationId);
-    alert(`Confirmation feature coming soon for reservation ID: ${reservationId}.`);
+async function confirmReservation(reservationId) {
+    if (!confirm('Are you sure you want to CONFIRM this reservation?')) {
+        return; 
+    }
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/reservations/${reservationId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'Confirmed' }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(`Confirmation Failed: ${data.message || 'Server error during confirmation.'}`);
+            console.error('Confirmation server error:', data);
+            return;
+        }
+
+        alert('Reservation Confirmed successfully! It will be removed from the Pending list shortly.');
+        renderAdminReservations(); // Refresh the list
+
+    } catch (error) {
+        console.error('Network error during confirmation:', error);
+        alert('A network error occurred. Could not confirm reservation.');
+    }
 }
 
 /**
- * Generates a new temporary password and updates the user's record.
- * @param {string} email - The email of the user whose password to reset.
+ * Sends a request to the API to change a reservation status to 'Cancelled'.
  */
-function resetUserPassword(email) {
-    // Generate a simple temporary password for simulation
-    const newPassword = Math.random().toString(36).slice(-8);
-
-    if (!confirm(`Are you sure you want to reset the password for ${email}? The new password will be: ${newPassword}`)) {
-        return;
+async function cancelReservation(reservationId) {
+    if (!confirm('Are you sure you want to CANCEL this reservation?')) {
+        return; 
     }
 
-    // 1. Find the user and update their password in the global 'users' array
-    const userIndex = users.findIndex(u => u.email === email);
+    try {
+        const response = await fetch(`http://localhost:3000/api/reservations/${reservationId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'Cancelled' }),
+        });
 
-    if (userIndex !== -1) {
-        // CRITICAL: Update the password in the data store
-        users[userIndex].password = newPassword;
-        saveUsers();
+        const data = await response.json();
 
-        alert(`Success! Password for ${email} has been reset to: ${newPassword}. (In a real system, this would be emailed to the user.)`);
+        if (!response.ok) {
+            alert(`Cancellation Failed: ${data.message || 'Server error during cancellation.'}`);
+            console.error('Cancellation server error:', data);
+            return;
+        }
+
+        alert('Reservation Cancelled successfully! It will be removed from the Pending list shortly.');
+        renderAdminReservations(); // Refresh the list
+
+    } catch (error) {
+        console.error('Network error during cancellation:', error);
+        alert('A network error occurred. Could not cancel reservation.');
     }
 }
 
@@ -614,7 +645,6 @@ function resetUserPassword(email) {
 window.renderUsersList = renderUsersList;
 window.changeUserRole = changeUserRole;
 window.deleteUser = deleteUser;
-window.resetUserPassword = resetUserPassword;
 
 // --- Dynamic Navigation Data and Renderer ---
 const navLinks = {
@@ -1313,9 +1343,9 @@ function displayPaymentSummary() {
     }
     
     // CRITICAL FIX: Concatenate firstName and lastName
-    if (summaryCustomerName && reservationData && reservationData.firstName && reservationData.lastName) {
-        // Combine the separate names for display
-        summaryCustomerName.textContent = `${reservationData.firstName} ${reservationData.lastName}`;
+    if (summaryCustomerName && reservationData && reservationData.full_name) {
+        // Use the unified full_name field for display
+        summaryCustomerName.textContent = reservationData.full_name;
     } else if (summaryCustomerName) {
         // Fallback if names are missing but data is present
         summaryCustomerName.textContent = 'Customer Data Missing';
