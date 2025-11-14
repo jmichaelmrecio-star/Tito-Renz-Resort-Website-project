@@ -350,7 +350,7 @@ async function renderUserReservations() {
             }
 
             row.innerHTML = `
-                <td>${res.id || 'N/A'}</td>
+                <td>${res._id.substring(0, 8) || 'N/A'}</td> 
                 <td>${res.serviceType}</td>
                 <td>${new Date(res.check_in).toLocaleDateString()}</td>
                 <td>₱${res.finalTotal.toFixed(2)}</td>
@@ -498,6 +498,91 @@ async function deleteUser(userId) {
         console.error('Failed to delete user:', error);
         alert(`Error: Could not delete user. ${error.message}`);
     }
+}
+
+/**
+ * Fetches all reservations with 'Paid' status and renders them on the Admin Dashboard.
+ * NOTE: This requires a new backend API route /api/reservations/pending
+ */
+async function renderAdminReservations() {
+    const list = document.getElementById('admin-reservations-list');
+
+    // Important: We should also check the user role here to prevent public access.
+    const userRole = getCurrentRole();
+    if (userRole !== 'admin' && userRole !== 'manager') {
+        if (list) {
+            list.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">ACCESS DENIED: Insufficient permissions.</td></tr>';
+        }
+        return;
+    }
+
+    if (!list) return;
+
+    list.innerHTML = '<tr><td colspan="7" style="text-align: center;">Loading pending reservations...</td></tr>';
+    
+    // CRITICAL: New API endpoint to fetch all PENDING reservations
+    const apiUrl = 'http://localhost:3000/api/reservations/pending'; 
+
+    try {
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch admin reservations: Status ${response.status}`);
+        }
+
+        const reservations = await response.json();
+        list.innerHTML = ''; // Clear loading message
+
+        if (reservations.length === 0) {
+            list.innerHTML = '<tr><td colspan="7" style="text-align: center;">No new paid reservations currently pending review.</td></tr>';
+            return;
+        }
+
+        // Render the fetched data
+        reservations.forEach(res => {
+            const row = document.createElement('tr');
+            
+            // Highlight rows based on payment reference number availability
+            const refNumberDisplay = res.gcashReferenceNumber ? res.gcashReferenceNumber : 'MISSING';
+            const rowClass = res.gcashReferenceNumber ? '' : 'bg-red-100'; // Highlight if reference is missing
+
+            row.innerHTML = `
+                <tr class="${rowClass}">
+                    <td>${res._id.substring(0, 8)}...</td> <td>${res.email}</td>
+                    <td>${res.serviceType}</td>
+                    <td>${new Date(res.check_in).toLocaleDateString()}</td>
+                    <td>₱${res.finalTotal.toFixed(2)}</td>
+                    <td>${refNumberDisplay}</td>
+                    <td>
+                        <button 
+                            class="bg-green-500 hover:bg-green-700 text-white py-1 px-3 rounded text-sm"
+                            onclick="confirmReservation('${res._id}')"
+                            >Confirm</button>
+                        <button 
+                            class="bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded text-sm ml-1"
+                            onclick="cancelReservation('${res._id}')"
+                            >Cancel</button>
+                    </td>
+                </tr>
+            `;
+            list.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error('Error fetching admin reservations:', error);
+        list.innerHTML = '<tr><td colspan="7" style="color: red; text-align: center;">Error: Could not connect to Admin API.</td></tr>';
+    }
+}
+
+/**
+ * Placeholder function for confirming a reservation status (Pending -> Confirmed).
+ * We will fully implement the API call here in the next step.
+ * @param {string} reservationId - The ID (_id) of the reservation to confirm.
+ */
+function confirmReservation(reservationId) {
+    // We will implement the PUT API call here next!
+    console.log('Attempting to confirm reservation:', reservationId);
+    alert(`Confirmation feature coming soon for reservation ID: ${reservationId}.`);
 }
 
 /**
@@ -1136,15 +1221,12 @@ async function submitReservation(event) {
     // --- 4. CRITICAL UPDATE: Calculate Final Price Asynchronously ---
     
     // 4A. Call the ASYNC pricing function to ensure it runs the API check 
-    // and saves the final price and discount to sessionStorage.
-    // The call must be awaited because it contains the fetch() call.
     await calculateFinalPrice(finalBasePrice);
 
     // 4B. Retrieve the final, calculated values from Session Storage
     const finalTotal = parseFloat(sessionStorage.getItem('finalTotal'));
     const discountValue = parseFloat(sessionStorage.getItem('discountValue'));
     const appliedPromoCodeJson = sessionStorage.getItem('appliedPromoCode');
-    // 💡 FIX: Check if the string is not 'null' before attempting JSON.parse()
     const promoCodeUsed = 
         appliedPromoCodeJson && appliedPromoCodeJson !== 'null' 
         ? JSON.parse(appliedPromoCodeJson).code 
@@ -1157,28 +1239,25 @@ async function submitReservation(event) {
 
     // 5. Prepare the complete reservation object (State)
     const reservationData = {
-        user_email: user.email,
+        // --- CRITICAL FIXES: Use the names the Mongoose Schema requires ---
+        email: user.email, // Use 'email' as the canonical name
+        full_name: `${user.first_name} ${user.last_name}`, // COMBINE FIRST AND LAST NAME
+        phone: user.phone || 'N/A', // Use 'phone' instead of 'contactNumber'
+        serviceType: finalServiceName, // The service name acts as the serviceType
+        // -----------------------------------------------------------------
+        
         serviceId: finalServiceId,
-        serviceType: finalServiceName, 
         check_in: checkInDateInput.value,
         check_out: checkOutDateInput.value,
         guests: parseInt(numberOfGuestsInput.value),
         
-        // --- NEW/UPDATED Fields ---
-        basePrice: finalBasePrice, // Good to save the original price too
+        basePrice: finalBasePrice,
         finalTotal: finalTotal,
         discountValue: discountValue,
         promoCodeUsed: promoCodeUsed, 
-        // -------------------------
-        
-        // Include user contact info for easier reference on the payment page/backend
-        firstName: user.first_name,
-        lastName: user.last_name,
-        contactNumber: user.phone || 'N/A' 
     };
 
     // 6. Store the complete state in Session Storage
-    // We only need to store the complete object once, as it contains finalTotal, discountValue, etc.
     sessionStorage.setItem('tempReservationData', JSON.stringify(reservationData));
 
     // 7. Success: Redirect to the payment page
@@ -1257,31 +1336,52 @@ function displayPaymentSummary() {
  * This runs on the submission of the payment form on payment.html and calls the API.
  */
 async function processGCashPayment(event) {
-    event.preventDefault(); 
+    event.preventDefault();
 
-    const storedReservationData = sessionStorage.getItem('tempReservationData');
-    const finalTotal = sessionStorage.getItem('finalTotal');
+    // 1. Retrieve Data from Session Storage and Form
+    const storedReservationDataString = sessionStorage.getItem('tempReservationData'); // STRING
+    const finalTotalString = sessionStorage.getItem('finalTotal');
+    const appliedPromoCode = sessionStorage.getItem('appliedPromoCode'); // JSON string or null
 
-    if (!storedReservationData || !finalTotal || parseFloat(finalTotal) <= 0) {
-        alert('Error: Missing reservation or price data. Please start the reservation process again.');
-        window.location.href = 'reserve.html';
+    // Get GCash Reference Number from the form input
+    const gcashReferenceNumber = document.getElementById('gcashReferenceNumber').value.trim();
+
+    // --- 1. VALIDATION CHECK BLOCK ---
+    if (!storedReservationDataString || !finalTotalString || !gcashReferenceNumber || gcashReferenceNumber.length < 10) {
+        alert('Missing critical data. Please ensure all fields are correctly filled and reservation data is present.');
+        if (!storedReservationDataString) {
+             window.location.href = 'reserve.html'; // Redirect if core data is missing
+        }
+        return;
+    }
+    // --------------------------------------------------
+
+    // Parse the core reservation data once
+    let coreReservationData;
+    try {
+        coreReservationData = JSON.parse(storedReservationDataString);
+    } catch (e) {
+        console.error('Failed to parse reservation data:', e);
+        alert('Internal error processing reservation data. Please try again.');
         return;
     }
 
-    // 1. Retrieve payment-specific data from the form
-    const gcashReferenceNumber = document.getElementById('gcashRefNumber')?.value.trim();
-    
-    if (!gcashReferenceNumber || gcashReferenceNumber.length < 10) {
-        alert('Please enter a valid GCash Reference Number (at least 10 digits).');
-        return;
-    }
-
-    // 2. Construct the final data payload
+    // 2. Build the Final Payload (Must include ALL required fields from the Mongoose Schema)
     const finalPayload = {
-        ...JSON.parse(storedReservationData), // Contains user_email, serviceType, dates, etc.
-        finalTotal: parseFloat(finalTotal),
+        // **CRITICAL FIX:** Include all fields from the stored data
+        ...coreReservationData, 
+
+        // Overwrite or ensure payment-specific fields are correct
+        finalTotal: parseFloat(finalTotalString),
         paymentMethod: 'GCash',
-        gcashReferenceNumber: gcashReferenceNumber // Sent for BE validation
+        gcashReferenceNumber,
+        
+        // Include promo code data if available
+        appliedPromoCode: appliedPromoCode || null 
+        
+        // Note: The fields the server requested (full_name, email, phone, etc.) 
+        // MUST BE present inside the 'coreReservationData' object 
+        // that was originally saved to 'tempReservationData'.
     };
 
     // 3. Send the complete data to the API to finalize the reservation
@@ -1296,18 +1396,23 @@ async function processGCashPayment(event) {
 
         if (!response.ok) {
             alert(`Reservation Failed: ${data.message || 'An error occurred during finalization.'}`);
+            console.error('Server error details:', data); // Log server details
             return;
         }
 
         // 4. Success! Clear temp storage and redirect to confirmation page
         sessionStorage.removeItem('tempReservationData');
         sessionStorage.removeItem('finalTotal');
+        sessionStorage.removeItem('appliedPromoCode'); // Clear this one too
+        
+        // Clean up other service-related items
         sessionStorage.removeItem('selectedServiceId');
         sessionStorage.removeItem('selectedServiceName');
         sessionStorage.removeItem('selectedServicePrice');
         
         alert('Payment confirmed! Your reservation is now pending and will be reviewed shortly.');
-        // Assuming your backend returns the new reservation ID
+        
+        // Assuming your backend returns the new reservation ID in data.reservationId
         window.location.href = 'confirmation.html?id=' + data.reservationId; 
 
     } catch (error) {
@@ -1339,12 +1444,23 @@ document.addEventListener('DOMContentLoaded', () => {
         renderUsersList(); // <--- Is this call present?
     }
 
-    // Logic specific to user-management.html
-    if (window.location.pathname.includes('user-management.html')) {
-        renderUsersList(); // Initial render
-        // Attach event listeners for filters/search if needed
-        document.getElementById('user-search-input')?.addEventListener('input', renderUsersList);
-        document.getElementById('user-role-filter')?.addEventListener('change', renderUsersList);
+    if (window.location.pathname.includes('admin-dashboard.html')) {
+        console.log('Admin Dashboard detected. Starting data fetches...');
+        
+        // 1. Fetch PENDING RESERVATIONS (The one we're debugging)
+        if (typeof renderAdminReservations === 'function') {
+            renderAdminReservations();
+        }
+
+        // 2. Fetch USER LIST (The one you saw running)
+        if (typeof renderUsersList === 'function') {
+            renderUsersList();
+        }
+        
+        // 3. Fetch PROMO CODES (The one you saw running)
+        if (typeof renderPromoCodeTable === 'function') {
+            renderPromoCodeTable();
+        }
     }
 
     // Logic specific to promotions.html

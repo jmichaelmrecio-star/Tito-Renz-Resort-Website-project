@@ -43,48 +43,19 @@ connectDB();
 const Reservation = require('./models/Reservation');
 const Account = require('./models/Account'); // <-- NEW: Your Account model
 const Role = require('./models/Role');     // <-- NEW: Your Role model
-
+const reservationRoutes = require('./routes/reservationRoutes');
 const promoCodeRoutes = require('./routes/promoCodeRoutes');
 
 // USE THE NEW PROMO CODE ROUTE
 app.use('/api/promocodes', promoCodeRoutes);
+
+app.use('/api/reservations', reservationRoutes);
 
 // --- ROUTES (API Endpoints) ---
 
 // Basic test route (still works on /)
 app.get('/', (req, res) => {
   res.send('Tito Renz Resort API is running!');
-});
-
-// We will add your reservation POST route here next...
-// POST /api/reservations: Handles new reservation submission
-app.post('/api/reservations', async (req, res) => {
-  try {
-    // The data sent from the front-end (your reservationData object) is in req.body
-    const reservationData = req.body;
-    
-    // Before saving, you would typically initiate the PayMongo process here, 
-    // but for now, we will simulate the save.
-
-    // 1. Create a new Reservation document using the data
-    const newReservation = new Reservation(reservationData);
-    
-    // 2. Save the document to the MongoDB database
-    await newReservation.save();
-
-    // 3. Send a success response back to the client
-    res.status(201).json({ 
-      message: 'Reservation successfully submitted and saved to database.',
-      reservation: newReservation
-    });
-
-  } catch (error) {
-    console.error('Reservation creation failed:', error.message);
-    res.status(500).json({ 
-      message: 'Server error during reservation submission.', 
-      error: error.message 
-    });
-  }
 });
 
 // POST /api/auth/login: Handles user login and role verification

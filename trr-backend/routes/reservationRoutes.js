@@ -2,27 +2,26 @@
 const express = require('express');
 const router = express.Router();
 const Reservation = require('../models/Reservation'); // Import your Mongoose model
+// Assuming you have a reservationController file:
+const reservationController = require('../controllers/reservationController');
 
-// EXISTING POST Route (for creating a reservation)
-router.post('/', async (req, res) => {
-    // ... (your existing reservation creation logic) ...
-});
+// --- CRITICAL FIX: Place SPECIFIC routes FIRST ---
 
-// NEW GET Route (to fetch reservations for a specific user)
-router.get('/user/:email', async (req, res) => {
-    try {
-        const userEmail = req.params.email;
-        // Find reservations where the email matches the logged-in user's email
-        // NOTE: The key name must match your Mongoose schema (which uses 'email').
-        const reservations = await Reservation.find({ email: userEmail }).sort({ dateCreated: -1 });
-        
-        // Respond with the array of reservations
-        res.status(200).json(reservations);
-        
-    } catch (error) {
-        console.error("Error fetching user reservations:", error);
-        res.status(500).json({ message: 'Error retrieving reservations', error: error.message });
-    }
-});
+// 1. NEW ROUTE (Specific name: 'pending') - MUST be first!
+router.get('/pending', reservationController.getPendingReservations); 
+
+// 2. Existing Route (Finalize) - Also specific
+router.post('/finalize', reservationController.finalizeReservation);
+
+// 3. Existing Route (User specific) - COMMENTED OUT until function is defined
+// router.get('/user/:email', reservationController.getUserReservations);
+
+
+// --- Generic Route LAST ---
+
+// 4. Existing Route (Generic ID: ':id') - MUST be last!
+// This route will now only catch requests that are NOT 'pending' or 'finalize'
+router.get('/:id', reservationController.getReservationById); 
+router.put('/:id', reservationController.updateReservationStatus); // COMMENTED OUT until function is defined
 
 module.exports = router;

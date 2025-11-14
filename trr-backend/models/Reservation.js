@@ -19,9 +19,20 @@ const ReservationSchema = new mongoose.Schema({
     finalTotal: { type: Number, required: true },
     
     // System Status
-    id: { type: String, unique: true, required: true }, // Use your custom QRES-timestamp ID
-    dateCreated: { type: String, required: true }, 
+    dateCreated: {
+        type: Date,
+        default: Date.now, // Automatically set the date
+        // REMOVE 'required: true' if it exists
+    },
     status: { type: String, default: 'pending' }, // e.g., 'pending', 'confirmed', 'cancelled'
+
+    // CRITICAL: DOES THIS FIELD EXIST IN YOUR SCHEMA?
+    gcashReferenceNumber: {
+        type: String,
+        required: false, // It's optional for old reservations, but present for new ones
+        trim: true,
+        default: null
+    },
     
     // Payment Data
     paymentRef: { type: String }, // Now less critical, will be replaced by PayMongo ID
