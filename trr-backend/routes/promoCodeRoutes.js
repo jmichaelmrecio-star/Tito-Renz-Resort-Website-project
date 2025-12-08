@@ -57,6 +57,39 @@ router.get('/all', async (req, res) => {
     }
 });
 
+// GET /api/promocodes/active - List active (non-expired) promo codes for public display
+router.get('/active/list', async (_req, res) => {
+    try {
+        const now = new Date();
+        const activeCodes = await PromoCode.find({
+            expirationDate: { $gte: now },
+            $expr: { $lt: ['$timesUsed', '$usageLimit'] },
+        }).sort({ expirationDate: 1 });
+
+        res.status(200).json(activeCodes);
+    } catch (error) {
+        console.error('Error fetching active promo codes:', error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
+// DELETE /api/promocodes/:id - Delete a promo code
+router.delete('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deleted = await PromoCode.findByIdAndDelete(id);
+
+        if (!deleted) {
+            return res.status(404).json({ message: 'Promo code not found.' });
+        }
+
+        res.status(200).json({ message: 'Promo code deleted successfully.' });
+    } catch (error) {
+        console.error('Error deleting promo code:', error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
 // GET /api/promocodes/:code - Lookup a specific promo code (Customer action)
 router.get('/:code', async (req, res) => {
     try {

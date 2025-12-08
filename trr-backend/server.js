@@ -45,9 +45,21 @@ const Account = require('./models/Account'); // <-- NEW: Your Account model
 const Role = require('./models/Role');     // <-- NEW: Your Role model
 const reservationRoutes = require('./routes/reservationRoutes');
 const promoCodeRoutes = require('./routes/promoCodeRoutes');
+const blockedDateRoutes = require('./routes/blockedDateRoutes');
+const authRoutes = require('./routes/authRoutes');
+const serviceRoutes = require('./routes/serviceRoutes');
+const path = require('path');
+// Note the '..' path to go up one directory from trr-backend to new website
+app.use(express.static(path.join(__dirname, '..'))); // <--- CORRECTED PATH!
+require('./models/BlockedDate');
+app.use('/api/auth', authRoutes);
 
 // USE THE NEW PROMO CODE ROUTE
 app.use('/api/promocodes', promoCodeRoutes);
+app.use('/api/blocked-dates', blockedDateRoutes);
+
+// Service management (all routes now use MongoDB database)
+app.use('/api/services', serviceRoutes);
 
 app.use('/api/reservations', reservationRoutes);
 
@@ -263,6 +275,22 @@ app.delete('/api/users/:id', async (req, res) => {
         res.status(500).json({ message: 'Server error during user deletion.' });
     }
 });
+
+
+// --- NEW VIEW ROUTES ---
+// The files are located in the parent directory (..)
+app.get('/reserve.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'reserve.html'));
+});
+
+app.get('/payment.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'payment.html'));
+});
+
+app.get('/confirmation.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'confirmation.html'));
+});
+// -----------------------
 
 
 

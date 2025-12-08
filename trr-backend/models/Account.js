@@ -18,6 +18,7 @@ const AccountSchema = new mongoose.Schema({
     phone: { type: String, required: true },
     
     password: { type: String, required: true, select: false },
+    isActive: { type: Boolean, default: true }, // For deactivation without deletion
     created_at: { type: Date, default: Date.now }
 });
 
