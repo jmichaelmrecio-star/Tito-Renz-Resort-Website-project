@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Amenities - Tito Renz Resort</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="nav-logo" aria-label="Tito Renz Resort">
+                <img src="images/logo.png" alt="Tito Renz Resort Logo">
+            </a>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="amenities.html" class="active">Amenities</a></li>
+                <li><a href="help.html">Help</a></li>
+            </ul>
+            <div class="nav-right" id="navRight"></div>
+        </nav>
+    </header>
+
+    <main class="has-fixed-header-offset">
+        <!-- Hero section with Pool_Area_top_view.jpg parallax background -->
+        <section class="amenities-hero">
+            <div class="hero-content">
+                <h1>Our Amenities</h1>
+                <p>Experience luxury and comfort with our world-class facilities</p>
+            </div>
+        </section>
+
+        <!-- Filter section with Bluesky.jpg parallax background -->
+        <section class="amenities-filters-section">
+            <div class="filter-card">
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="amenity-type-filter">Filter by Type:</label>
+                        <select id="amenity-type-filter" class="filter-select">
+                            <option value="all">All Types</option>
+                            <option value="villa">Villa Rooms</option>
+                            <option value="charm">Charm Rooms</option>
+                            <option value="venue">Venues & Halls</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="amenity-capacity-filter">Filter by Capacity:</label>
+                        <select id="amenity-capacity-filter" class="filter-select">
+                            <option value="0">Any Capacity</option>
+                            <option value="2">2+ guests</option>
+                            <option value="4">4+ guests</option>
+                            <option value="8">8+ guests</option>
+                            <option value="20">20+ guests</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Grid section with Sunsetting.jpg parallax background -->
+        <section class="amenities-grid-section">
+            <div id="amenities-grid" class="amenities-grid">
+                <p style="color: white; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">Loading amenities...</p>
+            </div>
+        </section>
+
+        <!-- Gallery Modal -->
+        <div id="amenity-gallery-modal" class="modal" style="display:none;">
+            <div class="modal-content" id="amenity-gallery-content">
+                <span class="close-modal" id="close-amenity-gallery">&times;</span>
+                <div id="gallery-images"></div>
+                <div id="gallery-caption" style="margin-top:1rem;"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section contact-info">
+                <h3>Tito Renz Resort</h3>
+                <p>Your seamless booking experience starts here.</p>
+                <p>📍 Norzagaray, Bulacan, Philippines</p>
+                <p>📞 0977 246 8920 or 0916 640 3411</p>
+                <p>📧 titorenznorzagaray@gmail.com</p>
+            </div>
+
+            <div class="footer-section quick-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="services-list.html">Reserve Now</a></li>
+                    <li><a href="checkin-demo.html">Check-in Demo</a></li>
+                    <li><a href="admin-dashboard.html">Admin Dashboard</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section about-contact">
+                <h3>About & Contact</h3>
+                <ul>
+                    <li><a href="about.html">Our Story</a></li>
+                    <li><a href="contact.html">Send Us a Message</a></li>
+                    <li><a href="help.html">Help / Guides</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 QReserve Project - All Rights Reserved.</p>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>

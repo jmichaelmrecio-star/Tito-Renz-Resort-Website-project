@@ -8,12 +8,14 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .profile-card {
-            max-width: 600px;
+            max-width: 800px;
             margin: 2rem auto;
             padding: 2rem;
             background-color: white;
             border-radius: var(--border-radius);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            min-height: auto;
+            overflow: visible;
         }
         .profile-info p {
             margin-bottom: 0.75rem;
@@ -24,18 +26,78 @@
             width: 150px;
             color: var(--primary-color);
         }
+        .profile-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 1rem;
+        }
+        .profile-modal.show {
+            display: flex;
+        }
+        .profile-modal .modal-card {
+            background: #fff;
+            border-radius: 12px;
+            max-width: 520px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 1.5rem;
+        }
+        .profile-modal .modal-card h4 {
+            margin: 0 0 1rem 0;
+        }
+        .profile-modal .form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .profile-modal label {
+            font-weight: 600;
+        }
+        .profile-modal input {
+            padding: 0.65rem 0.75rem;
+            border: 1px solid #d6d6d6;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        .profile-modal .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        .button-ghost {
+            background: transparent;
+            border: 1px solid #ccc;
+            color: #333;
+            border-radius: 6px;
+            padding: 0.65rem 1rem;
+            cursor: pointer;
+        }
+        .table-container {
+            width: 100%;
+            margin-top: 1.5rem;
+            overflow-x: auto;
+        }
     </style>
 </head>
 <body>
     <header>
         <nav>
-            <h1><a href="index.html" style="color: white; text-decoration: none;">Tito Renz Resort </a></h1>
+            <a href="index.html" class="nav-logo" aria-label="Tito Renz Resort">
+                <img src="images/logo.png" alt="Tito Renz Resort Logo">
+            </a>
             <ul>
                 </ul>
         </nav>
     </header>
 
-    <main class="container page-content">
+    <main class="container page-content has-fixed-header-offset">
         <h2>My Profile & Account</h2>
 
         <div class="profile-layout">
@@ -48,8 +110,40 @@
                     <p><strong>Contact:</strong> <span id="profile-contact">Loading...</span></p>
                     <p><strong>Account Type:</strong> <span id="profile-role">Loading...</span></p>
                 </div>
-                <button class="button-secondary" onclick="alert('Simulation: Edit functionality would be implemented here.')">Edit Details</button>
+                <button class="button-secondary" onclick="openProfileEditModal()">Edit Details</button>
             </section>
+
+            <div id="profile-edit-modal" class="profile-modal" aria-hidden="true">
+                <div class="modal-card">
+                    <h4>Edit Profile</h4>
+                    <form id="profile-edit-form">
+                        <div class="form-row">
+                            <label for="edit-first-name">First Name</label>
+                            <input type="text" id="edit-first-name" name="first_name" placeholder="John" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="edit-middle-name">Middle Name (Optional)</label>
+                            <input type="text" id="edit-middle-name" name="middle_name" placeholder="N/A if none" maxlength="50">
+                        </div>
+                        <div class="form-row">
+                            <label for="edit-last-name">Last Name</label>
+                            <input type="text" id="edit-last-name" name="last_name" placeholder="Doe" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="edit-email">Email</label>
+                            <input type="email" id="edit-email" name="email" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="edit-phone">Contact Number</label>
+                            <input type="tel" id="edit-phone" name="phone" placeholder="09xxxxxxxxx" pattern="[0-9]{11}" required>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="button-ghost" onclick="closeProfileEditModal()">Cancel</button>
+                            <button type="submit" class="button-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
             
             <section class="profile-card">
                 <h3>My Recent Reservations</h3>
@@ -62,10 +156,11 @@
                                 <th>Check-in Date</th>
                                 <th>Total Paid</th>
                                 <th>Status</th>
+                                <th>QR Code</th>
                             </tr>
                         </thead>
                         <tbody id="user-reservations-list">
-                            <tr><td colspan="5" style="text-align: center;">Loading Reservations...</td></tr>
+                            <tr><td colspan="6" style="text-align: center;">Loading Reservations...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -107,6 +202,8 @@
         </div>
     </footer>
 
+    <script src="notifications.js"></script>
     <script src="script.js"></script>
+    <script src="incomplete-reservation-tracker.js"></script>
 </body>
 </html>

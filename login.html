@@ -7,18 +7,40 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* ADD THIS CSS TO CENTER BUTTONS */
+        /* Optimized form styling for better UX */
+        .form-container {
+            max-width: 380px;
+            margin: 0 auto;
+        }
+
         .form-container form {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
-        .form-container button[type="submit"] {
-            /* Force button to be contained in a div for centering */
-            align-self: center; 
+
+        .form-container .form-group input {
             width: 100%;
-            max-width: 300px; /* Optional: limit button width */
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-container .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .form-container button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
             margin-top: 10px;
+            border-radius: 6px;
         }
     </style>
 </head>
@@ -26,18 +48,25 @@
     <header>
         <div class="container">
             <nav>
-                <h1><a href="index.html" style="color: white; text-decoration: none;">Tito Renz Resort </a></h1>
+                <a href="index.html" class="nav-logo" aria-label="Tito Renz Resort">
+                    <img src="images/logo.png" alt="Tito Renz Resort Logo">
+                </a>
                 <ul>
-                    </ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="amenities.html">Amenities</a></li>
+                    <li><a href="help.html">Help</a></li>
+                </ul>
+                <div class="nav-right" id="navRight"></div>
             </nav>
         </div>
     </header>
 
-    <main class="container page-content" id="login-area">
+    <main class="container page-content has-fixed-header-offset" id="login-area">
         <div class="form-container">
             <h2>User Login</h2>
             <p>Welcome back! Please enter your credentials to continue.</p>
             <form id="loginForm">
+                <p id="loginMessage" class="message-area" style="text-align: center; color: red; margin-bottom: 15px;"></p>
                 <div class="form-group">
                     <label for="loginEmail">Email:</label>
                     <input type="email" id="loginEmail" name="email" required>
@@ -87,6 +116,7 @@
         </div>
     </footer>
 
+    <script src="notifications.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -7,7 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Specific styling for the dashboard table */
+        /* Specific styling for the dashboard */
         #dashboard-area {
             background-color: white;
             padding: 2rem;
@@ -19,20 +19,6 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
-        }
-        .reservation-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .reservation-table th, .reservation-table td {
-            border: 1px solid #dee2e6;
-            padding: 12px;
-            text-align: left;
-            font-size: 0.9rem;
-        }
-        .reservation-table th {
-            background-color: #e9ecef;
-            color: var(--text-color);
         }
         .status-checked-in {
             color: var(--primary-color);
@@ -47,22 +33,27 @@
 <body>
     <header>
         <nav>
-            <h1><a href="index.html" style="color: white; text-decoration: none;">Tito Renz Resort </a></h1>
+            <a href="index.html" class="nav-logo" aria-label="Tito Renz Resort">
+                <img src="images/logo.png" alt="Tito Renz Resort Logo">
+            </a>
             <ul>
                 </ul>
         </nav>
     </header>
 
-    <main>
+    <main class="has-fixed-header-offset">
 
         <section id="admin-actions" class="container" style="margin-top: 20px;">
-            <h3>Management Shortcuts:</h3>
-            <ul>
-                <li><a href="#schedule-management">Manage Schedule</a></li>
-                <li><a href="#user-management">Manage Users</a></li>
-                <li><a href="#dashboard-area">Manage Reservations</a></li>
-                <li><a href="#nav-promocodes">Manage Promo Codes</a></li> 
-            </ul>
+            <div class="admin-tabs">
+                <div class="tab-buttons" role="tablist" aria-label="Admin Sections">
+                    <button class="tab-button active" data-target="schedule-management" role="tab" aria-selected="true">Schedule</button>
+                    <button class="tab-button" data-target="nav-promocodes" role="tab" aria-selected="false">Promo Codes</button>
+                    <button class="tab-button" data-target="user-management" role="tab" aria-selected="false">Users</button>
+                    <button class="tab-button" data-target="service-management" role="tab" aria-selected="false">Services</button>
+                    <button class="tab-button" data-target="dashboard-area" role="tab" aria-selected="false">Reservations</button>
+                    <a class="tab-button" href="checkin.html">QR Check-in</a>
+                </div>
+            </div>
         </section>
 
         <section id="schedule-management" class="container card-grid">
@@ -72,8 +63,8 @@
                 <form id="blockDateForm" style="margin-top: 15px;">
                     <div class="form-group" style="display: flex; gap: 20px;">
                         <div style="flex: 1;">
-                            <label for="blockDate">Block START Date (YYYY-MM-DD):</label>
-                            <input type="date" id="blockDate" required>
+                            <label for="blockStartDate">Block START Date (YYYY-MM-DD):</label>
+                            <input type="date" id="blockStartDate" required>
                         </div>
                         <div style="flex: 1;">
                             <label for="blockEndDate">Block END Date (YYYY-MM-DD):</label>
@@ -105,36 +96,36 @@
             <!-- 1. Creation Form -->
             <div class="card mb-4 p-4">
                 <h4>Create New Promo Code</h4>
-                <form id="createPromoCodeForm">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label for="promoCodeInput" class="form-label">Code (e.g., SUMMER10)</label>
-                            <input type="text" class="form-control" id="promoCodeInput" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="discountPercentageInput" class="form-label">Discount (%)</label>
-                            <input type="number" class="form-control" id="discountPercentageInput" min="1" max="100" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="expirationDateInput" class="form-label">Expiration Date</label>
-                            <input type="date" class="form-control" id="expirationDateInput" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="minPurchaseAmountInput" class="form-label">Min Purchase (₱)</label>
-                            <input type="number" class="form-control" id="minPurchaseAmountInput" min="0" value="0">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="usageLimitInput" class="form-label">Usage Limit</label>
-                            <input type="number" class="form-control" id="usageLimitInput" min="1" value="50">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary mt-3">Create Code</button>
-                    <p id="promoCodeMessage" class="mt-2"></p>
+                <form id="createPromoCodeForm"> 
+                    <div class="form-group-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;"> 
+                        <div class="form-group"> 
+                            <label for="newPromoCodeInput">Code (e.g., SUMMER10)</label> 
+                            <input type="text" id="newPromoCodeInput" required>
+                        </div> 
+                        <div class="form-group"> 
+                            <label for="discountPercentageInput">Discount (%)</label> 
+                            <input type="number" id="discountPercentageInput" min="1" max="100" required> 
+                        </div> 
+                        <div class="form-group"> 
+                            <label for="expirationDateInput">Expiration Date</label> 
+                            <input type="date" id="expirationDateInput" required> 
+                        </div> 
+                        <div class="form-group"> 
+                            <label for="minPurchaseAmountInput">Min Purchase (₱)</label> 
+                            <input type="number" id="minPurchaseAmountInput" min="0" value="0"> 
+                        </div> 
+                        <div class="form-group"> 
+                            <label for="usageLimitInput">Usage Limit</label> 
+                            <input type="number" id="usageLimitInput" min="1" value="50"> 
+                        </div> 
+                    </div> 
+                    <button type="submit" class="button-primary" style="margin-top: 15px;">Create Code</button> 
+                    <p id="createPromoCodeMessage" class="mt-2"></p> 
                 </form>
             </div>
  
             <!-- 2. Display Table -->
-            <h4>Existing Promo Codes</h4>
+            <h4 style="margin-bottom: 1.5rem;">Existing Promo Codes</h4>
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead>
@@ -145,11 +136,12 @@
                             <th>Min Purchase</th>
                             <th>Used / Limit</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="promoCodeTableBody">
                         <!-- Data will be inserted here by JavaScript -->
-                        <tr><td colspan="6" class="text-center">Loading promo codes...</td></tr>
+                        <tr><td colspan="7" style="text-align: center; padding: 2rem;">Loading promo codes...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -157,9 +149,113 @@
         <!-- END NEW PROMO CODE PANE -->
         <br>
 
+        <!-- NEW SERVICE MANAGEMENT PANE -->
+        <div class="tab-pane fade" id="service-management" role="tabpanel" aria-labelledby="service-management-tab">
+            <h2>Service Management</h2>
+ 
+            <!-- 1. Creation Form -->
+            <div class="card mb-4 p-4">
+                <h4>Create New Service</h4>
+                <form id="createServiceForm">
+                    <div class="form-group-grid" style="display: flex; flex-wrap: wrap; gap: 15px;">
+                        <div style="flex: 1 1 45%;">
+                            <label for="serviceIdInput">Service ID (unique, e.g., villa_room_5)</label>
+                            <input type="text" id="serviceIdInput" required>
+                        </div>
+                        <div style="flex: 1 1 45%;">
+                            <label for="serviceNameInput">Service Name (e.g., Villa #5)</label>
+                            <input type="text" id="serviceNameInput" required>
+                        </div>
+                        <div style="flex: 1 1 22%;">
+                            <label for="serviceTypeInput">Type</label>
+                            <select id="serviceTypeInput" required>
+                                <option value="">-- Select --</option>
+                                <option value="villa">Villa</option>
+                                <option value="charm">Charm</option>
+                                <option value="venue">Venue</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 22%;">
+                            <label for="serviceCategoryInput">Category</label>
+                            <select id="serviceCategoryInput" required>
+                                <option value="">-- Select --</option>
+                                <option value="accommodation">Accommodation</option>
+                                <option value="event_space">Event Space</option>
+                                <option value="water_facility">Water Facility</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1 1 22%;">
+                            <label for="serviceMaxGuestsInput">Max Guests</label>
+                            <input type="number" id="serviceMaxGuestsInput" min="1" required>
+                        </div>
+                        <div style="flex: 1 1 100%;">
+                            <label for="serviceDescriptionInput">Description</label>
+                            <textarea id="serviceDescriptionInput" rows="2" required></textarea>
+                        </div>
+                        <div style="flex: 1 1 45%;">
+                            <label for="serviceImageInput">Main Image</label>
+                            <input type="file" id="serviceImageInput" accept="image/*" required>
+                            <small style="color: #666; display: block; margin-top: 5px;">Selected: <span id="serviceImageName">None</span></small>
+                        </div>
+                        <div style="flex: 1 1 45%;">
+                            <label for="serviceGalleryInput">Gallery Images</label>
+                            <input type="file" id="serviceGalleryInput" accept="image/*" multiple>
+                            <small style="color: #666; display: block; margin-top: 5px;">Selected: <span id="serviceGalleryCount">0</span> image(s)</small>
+                        </div>
+                        <div style="flex: 1 1 100%;">
+                            <label for="serviceInclusionsInput">Inclusions (comma-separated)</label>
+                            <textarea id="serviceInclusionsInput" rows="2" placeholder="Item 1, Item 2, Item 3"></textarea>
+                        </div>
+                        <div style="flex: 1 1 100%;">
+                            <label for="serviceNotesInput">Notes (optional)</label>
+                            <textarea id="serviceNotesInput" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <h5 style="margin-top: 20px;">Durations / Time Slots</h5>
+                    <div id="durationsContainer" style="margin-bottom: 15px; border: 1px solid #dee2e6; padding: 15px; border-radius: 6px;">
+                        <!-- Repeating duration rows will be inserted here -->
+                    </div>
+                    <button type="button" id="addDurationBtn" class="button-secondary" style="margin-bottom: 15px;">+ Add Duration</button>
+                    <button type="submit" class="button-primary" style="margin-top: 15px;">Create Service</button>
+                    <p id="createServiceMessage" class="mt-2"></p>
+                </form>
+            </div>
+ 
+            <!-- 2. Display Table -->
+            <h4>Existing Services</h4>
+            <div class="table-scroll-wrapper">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Max Guests</th>
+                            <th>Active Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="serviceTableBody">
+                        <!-- Data will be inserted here by JavaScript -->
+                        <tr><td colspan="7" class="text-center">Loading services...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- END NEW SERVICE MANAGEMENT PANE -->
+        <br>
+
         <section id="user-management" class="admin-section" style="margin-bottom: 30px;">
-            <h2>Admin: User Accounts Management</h2>
-            <p>List of all accounts registered in the database. Use this section to manage roles and accounts.</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h2>Admin: User Accounts Management</h2>
+                    <p>List of all accounts registered in the database. Use this section to manage roles and accounts.</p>
+                </div>
+                <button class="button-primary" onclick="openCreateAccountModal()" style="height: fit-content;">
+                    ➕ Add Account
+                </button>
+            </div>
             
             <div class="table-container">
                 <table class="reservation-table">
@@ -170,11 +266,12 @@
                             <th>Email</th>
                             <th>Contact</th>
                             <th>Role (ID)</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="users-table-body">
-                        <tr><td colspan="6" style="text-align: center;">Loading User Accounts...</td></tr>
+                        <tr><td colspan="7" style="text-align: center;">Loading User Accounts...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -188,24 +285,75 @@
                 </div>
             </div>
 
-            <table class="reservation-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Customer</th>
-                        <th>Email</th>
-                        <th>Service-type</th>
-                        <th>Check-in Date</th>
-                        <th>Total Amount</th>
-                        <th>GCash Ref #</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-reservation-list">
-                    </tbody>
-            </table>
+            <div class="table-scroll-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Email</th>
+                            <th>Service-type</th>
+                            <th>Check-in Date</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th>GCash Ref #</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-reservation-list">
+                        </tbody>
+                </table>
+            </div>
         </section>
     </main>
+
+    <!-- CREATE/EDIT ACCOUNT MODAL -->
+    <div id="accountModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); overflow-y: auto;">
+        <div style="background-color: white; margin: 5% auto 5% auto; padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-height: 85vh; overflow-y: auto;">
+            <span style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; float: right;" onclick="closeAccountModal()">&times;</span>
+            <h2 id="accountModalTitle">Create New Account</h2>
+            <form id="accountForm" style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                <div class="form-group">
+                    <label for="accountFirstName">First Name:</label>
+                    <input type="text" id="accountFirstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="accountMiddleName">Middle Name (Optional):</label>
+                    <input type="text" id="accountMiddleName" name="middleName" placeholder="N/A if none">
+                </div>
+                <div class="form-group">
+                    <label for="accountLastName">Last Name:</label>
+                    <input type="text" id="accountLastName" name="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label for="accountEmail">Email Address:</label>
+                    <input type="email" id="accountEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="accountPhone">Contact Number:</label>
+                    <input type="tel" id="accountPhone" name="phone" pattern="[0-9]{11}" title="Contact number must be 11 digits (e.g., 09123456789)" required>
+                </div>
+                <div class="form-group">
+                    <label for="accountPassword">Password <span id="passwordLabel">(Min 6 characters):</span></label>
+                    <input type="password" id="accountPassword" name="password" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label for="accountRole">Role:</label>
+                    <select id="accountRole" name="role" required>
+                        <option value="">-- Select Role --</option>
+                        <option value="customer">Customer</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="button-primary" style="flex: 1;">Save Account</button>
+                    <button type="button" class="button-secondary" onclick="closeAccountModal()" style="flex: 1;">Cancel</button>
+                </div>
+                <p id="accountFormMessage" style="color: red; text-align: center; margin-top: 10px;"></p>
+            </form>
+        </div>
+    </div>
 
     <footer>
         <div class="footer-content">
@@ -240,6 +388,49 @@
         </div>
     </footer>
 
+    <script src="notifications.js"></script>
     <script src="script.js"></script>
+    <script>
+    // Tab switching for admin dashboard
+    (function(){
+        function showTab(targetId) {
+            // Deactivate all tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-target') === targetId);
+                if (btn.getAttribute('data-target')) {
+                    btn.setAttribute('aria-selected', btn.getAttribute('data-target') === targetId ? 'true' : 'false');
+                }
+            });
+
+            // Hide all panes and mark the targeted one active
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            const pane = document.getElementById(targetId);
+            if (pane) pane.classList.add('active');
+
+            // Also scroll to top of admin area for visibility
+            const adminTop = document.getElementById('admin-actions');
+            if (adminTop) adminTop.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ensure sections have .tab-pane class
+            ['schedule-management','nav-promocodes','service-management','user-management','dashboard-area'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('tab-pane');
+            });
+
+            // Default show schedule-management on load
+            showTab('schedule-management');
+
+            // Wire up tab button clicks
+            document.querySelectorAll('.tab-button[data-target]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.getAttribute('data-target');
+                    showTab(target);
+                });
+            });
+        });
+    })();
+    </script>
 </body>
 </html>

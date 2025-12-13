@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QReserve: Confirmation</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .confirmation-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            border-top: 5px solid #007bff;
+        }
+        .confirmation-card h1 {
+            color: #007bff;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .confirmation-card p {
+            color: #6c757d;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+        #qrcode-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            background-color: #f9f9f9;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed #e9ecef;
+            font-size: 1rem;
+        }
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+        .detail-value {
+            color: #007bff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="confirmationCard" class="confirmation-card">
+        <h1>✅ Reservation Confirmed</h1>
+        <p>Thank you for booking with Tito Renz Resort! Scan the QR code below for check-in.</p>
+
+        <div id="qrcode-container">
+            <div id="qrcodeCanvas"></div>
+        </div>
+        
+        <div class="detail-item">
+            <span class="detail-label">Service Type:</span>
+            <span id="serviceDisplay" class="detail-value">Loading...</span>
+        </div>
+        
+        <div class="detail-item">
+            <span class="detail-label">Confirmation Hash:</span>
+            <span id="qrCodeHashDisplay" style="font-size: 0.9rem;">Loading...</span>
+        </div>
+        
+        <div class="detail-item">
+            <span class="detail-label">System ID:</span>
+            <span id="reservationIdDisplay" style="font-size: 0.9rem;">Loading...</span>
+        </div>
+        
+        <p style="margin-top: 30px; font-size: 0.8rem; color: #999;">
+            Please present this page (printed or digital) upon arrival.
+        </p>
+    </div>
+
+<script>
+    // Function to extract URL parameters
+    const getUrlParameter = (name) => {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        const results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    };
+    
+    // Function to generate the QR Code
+    const generateQRCode = (data) => {
+        // Clear previous QR code if any
+        const canvasElement = document.getElementById("qrcodeCanvas");
+        canvasElement.innerHTML = ''; 
+
+        // Uses the globally available QRCode constructor from the included script
+        new QRCode(canvasElement, {
+            text: data,
+            width: 180,
+            height: 180,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+    };
+
+    // Function to fetch confirmation details from the server
+    const fetchConfirmationDetails = async (hash) => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/reservations/hash/${hash}`);
+            
+            // CRITICAL FIX: Informative alert for 'Failed to fetch' error
+            if (response.status === 404) {
+                 window.alert(`Reservation details not found for hash: ${hash}. Please check the URL.`);
+                 return null;
+            }
+            if (!response.ok) {
+                 window.alert('CRITICAL NETWORK ERROR: Could not connect to the backend server at http://localhost:3000. Ensure your Node.js server is running.');
+                 return null;
+            }
+            
+            const data = await response.json();
+
+            if (!data.success) {
+                console.error('Failed to load reservation details:', data.message);
+                document.getElementById('serviceDisplay').textContent = "Error loading details.";
+                return null;
+            }
+            return data.reservation;
+
+        } catch (error) {
+            console.error('Network error during detail fetch:', error);
+            document.getElementById('serviceDisplay').textContent = "Network error.";
+            window.alert('A critical network error occurred. Please check your console for details.');
+            return null;
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const qrCodeHash = getUrlParameter('hash');
+        
+        const hashDisplay = document.getElementById('qrCodeHashDisplay');
+        const idDisplay = document.getElementById('reservationIdDisplay');
+        const serviceDisplay = document.getElementById('serviceDisplay');
+        const card = document.getElementById('confirmationCard');
+
+        if (qrCodeHash) {
+            // 1. Generate QR Code
+            generateQRCode(qrCodeHash);
+            hashDisplay.textContent = qrCodeHash;
+
+            // 2. Fetch Details
+            const reservation = await fetchConfirmationDetails(qrCodeHash);
+
+            if (reservation) {
+                // 3. Display the real data
+                idDisplay.textContent = reservation._id;
+                serviceDisplay.textContent = `${reservation.serviceType} Booking`; 
+
+            } else {
+                // Handle fetch failure
+                idDisplay.textContent = 'N/A';
+                serviceDisplay.textContent = 'N/A';
+                card.querySelector('h1').textContent = "Details Unavailable";
+                card.querySelector('p').textContent = "We confirmed your payment, but failed to retrieve full details. Please contact the resort.";
+            }
+            
+        } else {
+            // Handle case where hash is missing
+            hashDisplay.textContent = 'Error: Missing Hash';
+            idDisplay.textContent = 'N/A';
+            serviceDisplay.textContent = 'N/A';
+            card.querySelector('h1').textContent = "Invalid Link";
+            card.querySelector('p').textContent = "The confirmation link is incomplete. Please use the link provided in your email.";
+        }
+    });
+</script>
+</body>
+</html>

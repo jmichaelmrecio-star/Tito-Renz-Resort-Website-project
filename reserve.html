@@ -11,23 +11,55 @@
 
 	<header>
         <nav>
-            <h1><a href="index.html" style="color: white; text-decoration: none;">Tito Renz Resort </a></h1>
+            <a href="index.html" class="nav-logo" aria-label="Tito Renz Resort">
+                <img src="images/logo.png" alt="Tito Renz Resort Logo">
+            </a>
             <ul>
                 </ul>
         </nav>
     </header>
-	<main>
-	    <section id="reservation-form-area">
-	        <h2>Complete Your Reservation</h2>
-	        <form id="reservationForm">
+	<main class="has-fixed-header-offset reserve-parallax">
+		<div class="reserve-parallax-inner">
+			<section id="reservation-form-area">
+				<h2>Complete Your Reservation</h2>
+				<form id="reservationForm">
 
+	        	<input type="hidden" id="serviceIdInput" name="serviceId" value="">
+				<input type="hidden" id="serviceTypeInput" name="serviceType" value="">
 	        	<fieldset>
-				    <legend>1. Selected Service</legend>
-				    <p>You have selected: <span id="selectedServiceDisplay" style="font-weight: bold; color: #dc3545;">(No Service Selected)</span></p>
-			    </fieldset>
+			    <legend>1. Selected Service</legend>
+			    <p>You have selected: <span id="selectedServiceDisplay" style="font-weight: bold; color: #dc3545;">(No Service Selected)</span></p>
+		    </fieldset>
+
+				<!-- NEW: Availability Calendar -->
+				<fieldset id="availabilityCalendarSection" style="display: none;">
+					<legend>📅 Service Availability Calendar</legend>
+					<p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
+						Below are the dates that are unavailable for this service. Please avoid these dates when making your reservation.
+					</p>
+					<div id="availabilityInfo" style="padding: 15px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+						<div style="display: flex; gap: 20px; margin-bottom: 10px; flex-wrap: wrap;">
+							<div>
+								<span style="display: inline-block; width: 20px; height: 20px; background-color: #dc3545; border-radius: 4px; vertical-align: middle;"></span>
+								<span style="margin-left: 8px; font-size: 0.9rem;">Blocked by Admin</span>
+							</div>
+							<div>
+								<span style="display: inline-block; width: 20px; height: 20px; background-color: #ffc107; border-radius: 4px; vertical-align: middle;"></span>
+								<span style="margin-left: 8px; font-size: 0.9rem;">Already Reserved</span>
+							</div>
+						</div>
+						<div id="unavailableDatesList" style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
+							<p style="color: #999;">Loading availability...</p>
+						</div>
+					</div>
+				</fieldset>
 
 	            <fieldset>
-	                <legend>2. Reservation Details</legend>
+	                <legend>2. Reservation Details</legend>	                <label for="duration-selector">Duration / Time Slot:</label>
+	                <select id="duration-selector" name="duration" required style="margin-bottom: 1rem;">
+	                    <option value="">Loading...</option>
+	                </select>
+	                <p id="duration-display" style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;"></p>
 
 	                <label for="guests">Number of Guests:</label>
 	                <input type="number" id="guests" name="number_of_guests" min="1" required>
@@ -39,33 +71,35 @@
 	                <input type="datetime-local" id="checkout" name="checkout_date" required>
 	            </fieldset>
 
-	            <fieldset>
-				    <legend>3. Your Contact & Personal Details</legend>
+	            <div id=guestDetailsForm>
+		            <fieldset>
+					    <legend>3. Your Contact & Personal Details</legend>
 
-				    <label for="name">Full Name:</label>
-				    <input type="text" id="name" name="customer_name" required>
+					    <label for="name">Full Name:</label>
+					    <input type="text" id="name" name="customer_name" required>
 
-				    <label for="contact">Contact Number:</label>
-				    <input type="tel" id="contact" name="customer_contact" required>
+					    <label for="contact">Contact Number:</label>
+					    <input type="tel" id="contact" name="customer_contact" required>
 
-				    <label for="email">Email Address:</label>
-				    <input type="email" id="email" name="customer_email" required>
-				    
-				    <label for="address">Residential Address (For Record):</label>
-				    <input type="text" id="address" name="customer_address" required>
+					    <label for="email">Email Address:</label>
+					    <input type="email" id="email" name="customer_email" required>
+					    
+					    <label for="address">Residential Address (For Record):</label>
+					    <input type="text" id="address" name="customer_address" required>
 
-				    <label for="notes">Special Requests / Notes (Optional):</label>
-				    <textarea id="notes" name="customer_notes" rows="3"></textarea>
-				</fieldset>
+					    <label for="notes">Special Requests / Notes (Optional):</label>
+					    <textarea id="notes" name="customer_notes" rows="3"></textarea>
+					</fieldset>
+				</div>
 
 	            <!-- Price Summary & Promo Code Area -->
 	            <div id="price-summary" class="summary-box">
-				    <h3>Reservation Summary</h3>
+				    <!--<h3>Reservation Summary</h3>-->
 				    
 				    <div class="form-group">
-				        <label for="promoCodeInput">Have a Promo Code?</label>
+				        <label for="promoCodeInput" style="display: flex; gap: 10px;">Have a Promo Code?</label>
 				        <div class="promo-input-group">
-				            <input type="text" id="promoCodeInput" placeholder="Enter code" class="form-control">
+				            <input type="text" id="promoCodeInput" placeholder="Enter code" class="form-control" style="flex-grow: 1;">
 				        </div>
 				        <p id="promoCodeMessage" style="margin-top: 5px; font-size: 0.9em;"></p>
 				    </div>
@@ -75,29 +109,30 @@
 				        </div>
 				    
 				    <hr>
-				    
+				    <h2>
 				    <div class="summary-total">
-				        <p>Subtotal (Base Price):</p>
-				        <p>₱<span id="basePriceDisplay">0.00</span></p> 
+						<p>Subtotal (Base Price):</p>
+				        <p>₱<span id="basePriceDisplay">0.00</span></p>
 				    </div>
 
 				    <div id="discountRow">
 				        <p>Discount:</p>
-				        <p>- ₱<span id="discountDisplay">0.00</span></p>
+				        <p><span id="discountDisplay">0.00</span></p>
 				    </div>
 				    
 				    <hr>
 
 				    <div id="finalTotalRow">
 				        <p style="font-weight: bold;">Total Amount Due:</p>
-				        <p style="font-weight: bold;">₱<span id="finalTotalDisplay">0.00</span></p>
+				        <p style="font-weight: bold;"><span id="finalTotalDisplay">0.00</span></p>
 				    </div>
+					</h2>
 				</div>
 				<br>
 
 				<fieldset>
 				    <legend>4. Terms and Conditions</legend>
-				    <div style="max-height: 150px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; font-size: 0.9em;">
+				    <!--<div style="max-height: 150px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; font-size: 0.9em;">
 				        <p style="font-weight: bold;">Tito Renz Resort Reservation Policy Highlights:</p>
 				        <ol>
 				            <li>**Deposit:** A non-refundable 50% deposit is required to confirm the reservation. The remainder is due upon check-in.</li>
@@ -107,19 +142,110 @@
 				            <li>**House Rules:** Guests must strictly follow all posted resort house rules (e.g., no loud noise after 10 PM, swimming pool guidelines). Failure to comply may result in removal without refund.</li>
 				        </ol>
 				        <p style="margin-top: 10px; color: #dc3545; font-weight: bold;">*The full, comprehensive Terms and Conditions are available upon request.*</p>
-				    </div>
-
+				    </div>-->
+			
 				    <div style="display: flex; align-items: center; gap: 8px; margin-top: 15px;">
 				        <input type="checkbox" id="termsCheck" name="terms_agreed" required style="width: auto;">
-				        <label for="termsCheck" style="font-weight: bold; margin: 0;">I have read and agree to the <a href="#" onclick="alert('Full Terms and Conditions would open here.'); return false;">Terms and Conditions</a>.</label>
+				        <label for="termsCheck" style="font-weight: bold; margin: 0;">I have read and agree to the <a href="#" onclick="showModal('Terms and Conditions', '<p>A comprehensive copy of our Terms and Conditions is available upon request by contacting our support team.</p><p><strong>Key Points:</strong></p><ul><li>Check-in/out times as specified</li><li>Cancellation policies apply</li><li>House rules must be followed</li><li>Full liability terms apply</li></ul><p>Please contact us for the complete document.</p>', 'info'); return false;">Terms and Conditions</a>.</label>
 				    </div>
 				</fieldset>
 				<br>
-
-	            <button type="submit" class="button-primary">Confirm & Submit Reservation</button>
-	        </form>
-	    </section>
+				<input type="hidden" id="serviceIdInput" name="serviceId" value="" />
+				<input type="hidden" id="serviceTypeInput" name="serviceType" value="" />
+				<input type="hidden" id="basePriceInput" name="basePrice" value="" />
+				<input type="hidden" id="finalTotalInput" name="finalTotal" value="" />
+				<input type="hidden" id="maxGuestsAllowed" value="0">
+				<input type="hidden" id="selectedDurationInput" name="selectedDuration" value="" />
+				<input type="hidden" id="selectedTimeSlotInput" name="selectedTimeSlot" value="" />
+				<input type="hidden" id="discountCodeInput" name="discountCode" value="" />
+				<input type="hidden" id="discountValueInput" name="discountValue" value="0" />
+				<div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+					<button type="button" class="button-secondary" id="viewSummaryBtn">View Reservation Summary</button>
+					<button type="submit" class="button-primary">Confirm & Submit Reservation</button>
+				</div>
+				</form>
+			</section>
+			</div>
 	</main>
+
+	<!-- Reservation Summary Modal -->
+	<div id="reservationSummaryModal" class="modal" style="display: none;">
+		<div class="modal-content summary-modal-content">
+			<div class="modal-header">
+				<h2>Reservation Summary</h2>
+				<button type="button" class="modal-close" onclick="document.getElementById('reservationSummaryModal').style.display = 'none';">&times;</button>
+			</div>
+			<div class="modal-body">
+				<!-- Service Details -->
+				<div class="summary-section">
+					<h3 class="summary-section-title">Service Details</h3>
+					<div class="summary-detail-row">
+						<span class="summary-detail-label">Service Name:</span>
+						<span class="summary-detail-value" id="summaryServiceName">-</span>
+					</div>
+					<div class="summary-detail-row">
+						<span class="summary-detail-label">Service Type:</span>
+						<span class="summary-detail-value" id="summaryServiceType">-</span>
+					</div>
+				</div>
+
+				<!-- Guest & Date Information -->
+				<div class="summary-section">
+					<h3 class="summary-section-title">Booking Details</h3>
+					<div class="summary-detail-row">
+						<span class="summary-detail-label">Number of Guests:</span>
+						<span class="summary-detail-value" id="summaryGuests">-</span>
+					</div>
+					<div class="summary-detail-row">
+						<span class="summary-detail-label">Check-in Date & Time:</span>
+						<span class="summary-detail-value" id="summaryCheckin">-</span>
+					</div>
+					<div class="summary-detail-row">
+						<span class="summary-detail-label">Check-out Date & Time:</span>
+						<span class="summary-detail-value" id="summaryCheckout">-</span>
+					</div>
+				</div>
+
+				<!-- Customer Information -->
+				<div class="summary-section">
+					<h3 class="summary-section-title">Customer Information</h3>
+					<div class="summary-detail-row">
+						<span class="summary-detail-label">Name:</span>
+						<span class="summary-detail-value" id="summaryCustomerName">-</span>
+					</div>
+				</div>
+
+				<!-- Service Inclusions -->
+				<div class="summary-section">
+					<h3 class="summary-section-title">Service Inclusions</h3>
+					<ul class="inclusions-list" id="summaryInclusions">
+						<li>Loading...</li>
+					</ul>
+				</div>
+
+				<!-- Pricing Summary -->
+				<div class="summary-section pricing-section">
+					<h3 class="summary-section-title">Pricing Summary</h3>
+					<div class="summary-detail-row pricing-row">
+						<span class="summary-detail-label">Base Price:</span>
+						<span class="summary-detail-value" id="summaryBasePrice">₱0.00</span>
+					</div>
+					<div class="summary-detail-row pricing-row" id="summaryDiscountRow" style="display: none;">
+						<span class="summary-detail-label">Discount:</span>
+						<span class="summary-detail-value discount-value" id="summaryDiscountValue">-₱0.00</span>
+					</div>
+					<div class="summary-detail-row pricing-row total-row">
+						<span class="summary-detail-label">Total Amount Due:</span>
+						<span class="summary-detail-value total-amount" id="summaryTotalAmount">₱0.00</span>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" onclick="document.getElementById('reservationSummaryModal').style.display = 'none';">Close</button>
+			</div>
+		</div>
+	</div>
+
 	<footer>
         <div class="footer-content">
             <div class="footer-section contact-info">
@@ -152,6 +278,204 @@
             <p>&copy; 2025 QReserve Project - All Rights Reserved.</p>
         </div>
     </footer>
+	<script src="notifications.js"></script>
 	<script src="script.js"></script>
+	<script src="incomplete-reservation-tracker.js"></script>
+	
+	<script>
+	// Fetch services from database on page load to get MongoDB IDs
+	document.addEventListener('DOMContentLoaded', function() {
+	    // CRITICAL FIX: Recover service data from localStorage if sessionStorage is empty
+	    if (typeof recoverServiceDataFromStorage === 'function') {
+	        recoverServiceDataFromStorage();
+	    }
+	    
+	    // Fetch services to ensure MongoDB _id fields are available
+	    fetchServices().then(() => {
+	        console.log('Services loaded with MongoDB IDs:', window.cachedServices);
+	        // IMPORTANT: Refresh the availability calendar now that we have MongoDB IDs
+	        if (typeof highlightUnavailableDates === 'function') {
+	            console.log('Refreshing availability calendar with MongoDB IDs...');
+	            highlightUnavailableDates();
+	        }
+	    }).catch(err => {
+	        console.warn('Failed to load services:', err);
+	    });
+	});
+	
+	// Auto-save reservation progress when form fields change
+	document.addEventListener('DOMContentLoaded', function() {
+	    const form = document.getElementById('reservationForm');
+	    if (form) {
+	        // Save on any form input change with debouncing
+	        let saveTimeout;
+	        
+	        // Comprehensive save function
+	        const saveFormData = function() {
+	            clearTimeout(saveTimeout);
+	            saveTimeout = setTimeout(function() {
+	                const data = {
+	                    selectedServiceId: sessionStorage.getItem('selectedServiceId') || document.getElementById('serviceIdInput')?.value,
+	                    selectedServiceName: sessionStorage.getItem('selectedServiceName'),
+	                    selectedServicePrice: sessionStorage.getItem('selectedServicePrice'),
+	                    selectedServiceMaxGuests: sessionStorage.getItem('selectedServiceMaxGuests'),
+	                    selectedServiceType: sessionStorage.getItem('selectedServiceType'),
+	                    selectedDuration: sessionStorage.getItem('selectedDuration'),
+	                    selectedDurationLabel: sessionStorage.getItem('selectedDurationLabel'),
+	                    serviceInclusions: sessionStorage.getItem('serviceInclusions'),
+	                    guests: document.getElementById('guests')?.value,
+	                    checkinDate: document.getElementById('checkin')?.value,
+	                    checkoutDate: document.getElementById('checkout')?.value,
+	                    customerName: document.getElementById('name')?.value,
+	                    customerContact: document.getElementById('contact')?.value,
+	                    customerEmail: document.getElementById('email')?.value,
+	                    customerAddress: document.getElementById('address')?.value,
+	                    customerNotes: document.getElementById('notes')?.value,
+	                    promoCode: document.getElementById('promo-code-input')?.value,
+	                    finalTotal: document.getElementById('finalTotalInput')?.value || sessionStorage.getItem('finalTotal'),
+	                    discountValue: document.getElementById('discountValueInput')?.value || sessionStorage.getItem('discountValue'),
+	                    appliedPromoCode: sessionStorage.getItem('appliedPromoCode') || document.getElementById('promoCodeInput')?.value,
+	                    termsAccepted: document.getElementById('termsCheckbox')?.checked || false
+	                };
+	                // Save to RESERVE page (current page, not services-list)
+	                saveReservationProgress('reserve', data);
+	                console.log('Reserve page auto-saved:', data);
+	            }, 1000); // Wait 1 second after last change before saving
+	        };
+	        
+	        // NEW: Save immediately on page load to capture current state
+	        saveFormData();
+	        
+	        // PHASE 5: Also explicitly save with page='reserve' on load to ensure tracker knows we're on reserve page
+	        const pageLoadData = {
+	            selectedServiceId: sessionStorage.getItem('selectedServiceId') || '',
+	            selectedServiceName: sessionStorage.getItem('selectedServiceName') || '',
+	            selectedServicePrice: sessionStorage.getItem('selectedServicePrice') || '',
+	            selectedServiceMaxGuests: sessionStorage.getItem('selectedServiceMaxGuests') || '',
+	            selectedServiceType: sessionStorage.getItem('selectedServiceType') || '',
+	            selectedDuration: sessionStorage.getItem('selectedDuration') || '',
+	            selectedDurationLabel: sessionStorage.getItem('selectedDurationLabel') || '',
+	            serviceInclusions: sessionStorage.getItem('serviceInclusions') || '',
+	            pageLoadAuto: true
+	        };
+	        if (typeof saveReservationProgress === 'function') {
+	            saveReservationProgress('reserve', pageLoadData);
+	            console.log('Reserve page auto-saved on load:', pageLoadData);
+	        }
+	        
+	        // Listen to both change and input events
+	        form.addEventListener('change', saveFormData);
+	        form.addEventListener('input', saveFormData);
+	    }
+	});
+
+	// View Reservation Summary Modal Functionality
+	document.addEventListener('DOMContentLoaded', function() {
+	    const viewSummaryBtn = document.getElementById('viewSummaryBtn');
+	    const summaryModal = document.getElementById('reservationSummaryModal');
+
+	    viewSummaryBtn.addEventListener('click', function(e) {
+	        e.preventDefault();
+	        populateReservationSummary();
+	        summaryModal.style.display = 'flex';
+	    });
+
+	    // Close modal when clicking outside the content
+	    window.addEventListener('click', function(e) {
+	        if (e.target === summaryModal) {
+	            summaryModal.style.display = 'none';
+	        }
+	    });
+	});
+
+	// Function to populate the reservation summary modal with current form data
+	function populateReservationSummary() {
+	    // Get service information
+	    const serviceName = sessionStorage.getItem('selectedServiceName') || 'Not Selected';
+	    const serviceType = sessionStorage.getItem('selectedServiceType') || 'Not Specified';
+	    const serviceInclusions = sessionStorage.getItem('serviceInclusions') || '[]';
+	    const basePrice = parseFloat(sessionStorage.getItem('selectedServicePrice')) || 0;
+	    
+	    // Get form values
+	    const customerName = document.getElementById('name')?.value || 'Not Entered';
+	    const guests = document.getElementById('guests')?.value || 'Not Specified';
+	    const checkinDateTime = document.getElementById('checkin')?.value || 'Not Selected';
+	    const checkoutDateTime = document.getElementById('checkout')?.value || 'Not Selected';
+	    
+	    // Get pricing information
+	    const finalTotal = parseFloat(document.getElementById('finalTotalInput')?.value) || basePrice;
+	    const discountValue = parseFloat(document.getElementById('discountValueInput')?.value) || 0;
+	    
+	    // Format dates and times
+	    const checkinFormatted = formatDateTimeForDisplay(checkinDateTime);
+	    const checkoutFormatted = formatDateTimeForDisplay(checkoutDateTime);
+	    
+	    // Parse inclusions
+	    let inclusionsArray = [];
+	    try {
+	        inclusionsArray = JSON.parse(serviceInclusions);
+	    } catch (e) {
+	        inclusionsArray = [];
+	    }
+	    
+	    // Populate modal fields
+	    document.getElementById('summaryServiceName').textContent = serviceName;
+	    document.getElementById('summaryServiceType').textContent = capitalizeString(serviceType);
+	    document.getElementById('summaryCustomerName').textContent = customerName;
+	    document.getElementById('summaryGuests').textContent = guests + ' guest' + (guests != 1 ? 's' : '');
+	    document.getElementById('summaryCheckin').textContent = checkinFormatted;
+	    document.getElementById('summaryCheckout').textContent = checkoutFormatted;
+	    document.getElementById('summaryBasePrice').textContent = '₱' + basePrice.toFixed(2);
+	    document.getElementById('summaryTotalAmount').textContent = '₱' + finalTotal.toFixed(2);
+	    
+	    // Show/hide discount row if applicable
+	    const discountRow = document.getElementById('summaryDiscountRow');
+	    if (discountValue > 0) {
+	        discountRow.style.display = 'flex';
+	        document.getElementById('summaryDiscountValue').textContent = '-₱' + discountValue.toFixed(2);
+	    } else {
+	        discountRow.style.display = 'none';
+	    }
+	    
+	    // Populate inclusions
+	    const inclusionsList = document.getElementById('summaryInclusions');
+	    if (inclusionsArray.length > 0) {
+	        inclusionsList.innerHTML = '';
+	        inclusionsArray.forEach(inclusion => {
+	            const li = document.createElement('li');
+	            li.textContent = inclusion;
+	            inclusionsList.appendChild(li);
+	        });
+	    } else {
+	        inclusionsList.innerHTML = '<li>No inclusions listed for this service</li>';
+	    }
+	}
+
+	// Helper function to format datetime-local input for display
+	function formatDateTimeForDisplay(datetimeStr) {
+	    if (!datetimeStr) return 'Not Selected';
+	    
+	    try {
+	        const [date, time] = datetimeStr.split('T');
+	        const [year, month, day] = date.split('-');
+	        const [hour, minute] = time.split(':');
+	        
+	        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	        const monthName = months[parseInt(month) - 1];
+	        
+	        const displayHour = parseInt(hour) > 12 ? parseInt(hour) - 12 : (parseInt(hour) === 0 ? 12 : parseInt(hour));
+	        const ampm = parseInt(hour) >= 12 ? 'PM' : 'AM';
+	        
+	        return `${monthName} ${parseInt(day)}, ${year} at ${displayHour}:${minute} ${ampm}`;
+	    } catch (e) {
+	        return datetimeStr;
+	    }
+	}
+
+	// Helper function to capitalize strings
+	function capitalizeString(str) {
+	    return str.replace(/\b\w/g, char => char.toUpperCase());
+	}
+	</script>
 </body>
 </html>

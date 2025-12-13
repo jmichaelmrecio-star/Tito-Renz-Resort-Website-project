@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Check-In Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- QR Code Scanner Library: Using jsQR instead of html5-qrcode for better reliability -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f7f7f7; }
+        .card { box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+        #qr-reader-video {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 8px;
+            border: 2px solid #4f46e5;
+        }
+        #qr-reader-overlay {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+        .scan-box {
+            position: absolute;
+            border: 3px solid #4f46e5;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="app" class="w-full max-w-lg bg-white p-8 rounded-xl card">
+        <h1 class="text-3xl font-bold mb-6 text-center text-indigo-700">Guest Check-In Terminal</h1>
+        
+        <!-- QR Scanner Video Feed -->
+        <div id="qr-reader-container" class="mb-6 w-full max-w-sm mx-auto hidden">
+            <div id="qr-reader-overlay" class="relative">
+                <video id="qr-reader-video" playsinline></video>
+                <canvas id="qr-reader-canvas" style="display: none;"></canvas>
+                <div class="scan-box"></div>
+            </div>
+        </div>
+        
+        <div id="qr-reader-results" class="text-center text-sm text-gray-500 mb-6"></div>
+
+        <div id="loading" class="text-center p-8 hidden">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+            <p class="text-gray-600">Checking reservation details...</p>
+        </div>
+
+        <div id="result-container" class="hidden">
+            <div id="status-icon" class="text-6xl text-center mb-4"></div>
+            <p id="status-message" class="text-xl font-semibold text-center mb-6"></p>
+
+            <div id="details-card" class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h2 class="text-lg font-bold mb-3 text-gray-800 border-b pb-2">Reservation Details</h2>
+                <div class="space-y-2 text-gray-700">
+                    <p><strong>Guest Name:</strong> <span id="guest-name">N/A</span></p>
+                    <p><strong>Service:</strong> <span id="service-type">N/A</span></p>
+                    <p><strong>Check-in:</strong> <span id="check-in-date">N/A</span></p>
+                    <p><strong>Guests:</strong> <span id="num-guests">N/A</span></p>
+                    <p><strong>Total Paid:</strong> <span id="total-paid" class="font-bold text-green-600">N/A</span></p>
+                </div>
+            </div>
+            
+            <p id="reservation-hash-display" class="mt-4 text-xs text-gray-500 text-center"></p>
+
+            <div class="flex gap-3 mt-6">
+                <button onclick="location.reload()" 
+                        class="flex-1 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-150">
+                    Scan Another QR Code
+                </button>
+                <button onclick="window.location.href='/admin-dashboard.html'" 
+                        class="flex-1 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-150">
+                    Return to Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Utility Function (Remains the same) ---
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // --- Authorization Token (AUTO-GENERATED) ---
+        // Token is fetched from backend on page load and renewed automatically
+        let STAFF_JWT_TOKEN = null;
+
+        async function fetchStaffToken() {
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/staff-token');
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch token: ${response.statusText}`);
+                }
+                const data = await response.json();
+                STAFF_JWT_TOKEN = data.token;
+                console.log('✅ Fresh staff token obtained (expires in 1 hour)');
+                return data.token;
+            } catch (error) {
+                console.error('❌ Failed to fetch staff token:', error);
+                document.getElementById('qr-reader-results').textContent = '❌ Failed to obtain authorization. Check server connection.';
+                document.getElementById('qr-reader-results').style.color = '#dc3545';
+                throw error;
+            }
+        }
+
+        function updateLocalReservationStatusLocal(reservationHash, statusValue) {
+            try {
+                const stored = JSON.parse(localStorage.getItem('qreserve_reservations')) || [];
+                const hash = (reservationHash || '').toString().toLowerCase();
+                let mutated = false;
+                const updated = stored.map(entry => {
+                    const entryHash = (entry.qrCodeHash || entry.reservationHash || '').toString().toLowerCase();
+                    if (hash && entryHash === hash) {
+                        mutated = true;
+                        return {
+                            ...entry,
+                            status: statusValue,
+                            paymentStatus: statusValue,
+                            updatedAt: new Date().toISOString()
+                        };
+                    }
+                    return entry;
+                });
+                if (mutated) {
+                    localStorage.setItem('qreserve_reservations', JSON.stringify(updated));
+                }
+            } catch (error) {
+                console.warn('Unable to sync local reservation status after check-in:', error);
+            }
+        }
+
+        // --- API & UI Handlers (Modified to hide scanner on success) ---
+        
+        // 🟢 NEW GLOBAL VARIABLE for the scanner instance
+        let html5QrcodeScanner = null;
+
+        function updateUI(status, message, details = null) {
+            // Hide the scanner divs when results are shown
+            document.getElementById('qr-reader-container').classList.add('hidden');
+            document.getElementById('qr-reader-results').classList.add('hidden');
+            
+            const resultContainer = document.getElementById('result-container');
+            const statusIcon = document.getElementById('status-icon');
+            const statusMessage = document.getElementById('status-message');
+            
+            resultContainer.classList.remove('hidden');
+            document.getElementById('loading').classList.add('hidden');
+
+            statusIcon.innerHTML = ''; // Clear previous icons
+            statusMessage.classList.remove('text-green-700', 'text-blue-700', 'text-red-700');
+            
+            if (status === 'CHECKED_IN') {
+                statusIcon.innerHTML = '✅';
+                statusIcon.classList.remove('text-red-500', 'text-blue-500');
+                statusIcon.classList.add('text-green-500');
+                statusMessage.classList.add('text-green-700');
+            } else if (status === 'ALREADY_CHECKED_IN') {
+                statusIcon.innerHTML = 'ℹ️';
+                statusIcon.classList.remove('text-red-500', 'text-green-500');
+                statusIcon.classList.add('text-blue-500');
+                statusMessage.classList.add('text-blue-700');
+            } else {
+                // FAILED, PAYMENT_PENDING, ERROR
+                statusIcon.innerHTML = '❌';
+                statusIcon.classList.remove('text-green-500', 'text-blue-500');
+                statusIcon.classList.add('text-red-500');
+                statusMessage.classList.add('text-red-700');
+            }
+            
+            statusMessage.textContent = message;
+
+            if (details) {
+                // Populate details card
+                document.getElementById('guest-name').textContent = details.guestName || 'N/A';
+                document.getElementById('service-type').textContent = details.service || 'N/A';
+                document.getElementById('check-in-date').textContent = new Date(details.checkIn).toLocaleDateString() || 'N/A';
+                document.getElementById('num-guests').textContent = details.guests || 'N/A';
+                document.getElementById('total-paid').textContent = '₱' + (details.totalPaid ? details.totalPaid.toFixed(2) : 'N/A'); 
+            }
+        }
+        
+        async function performCheckIn(reservationHash) {
+            // Hide the scanner and show loading indicator
+            document.getElementById('qr-reader-container').classList.add('hidden');
+            document.getElementById('qr-reader-results').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+            
+            // Stop the video stream
+            scannerActive = false;
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+            
+            document.getElementById('reservation-hash-display').textContent = `Hash: ${reservationHash}`;
+
+            if (!reservationHash) {
+                return updateUI('ERROR', 'Invalid or missing reservation QR code hash.');
+            }
+
+            // Ensure we have a valid token
+            if (!STAFF_JWT_TOKEN) {
+                try {
+                    await fetchStaffToken();
+                } catch (error) {
+                    return updateUI('ERROR', 'Authorization failed. Unable to obtain staff token.');
+                }
+            }
+
+            // Use full URL with protocol and host
+            const apiUrl = `http://localhost:3000/api/reservations/check-in/${encodeURIComponent(reservationHash)}`;
+            
+            console.log('🔍 Attempting check-in with hash:', reservationHash);
+            console.log('📡 API URL:', apiUrl);
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${STAFF_JWT_TOKEN}`
+                    },
+                });
+
+                console.log('📥 API Response Status:', response.status, response.statusText);
+
+                const data = await response.json();
+                
+                console.log('📦 API Response Data:', data);
+
+                if (response.ok) {
+                    updateLocalReservationStatusLocal(reservationHash, 'CHECKED_IN');
+                    updateUI(data.status, data.message, data.reservationDetails);
+                } else {
+                    console.error('❌ Check-in failed:', data);
+                    updateUI(data.status || 'ERROR', data.message || `API Error: ${response.statusText}`);
+                }
+            } catch (error) {
+                console.error('❌ Network or Check-in error:', error);
+                updateUI('ERROR', `Network error: ${error.message}. Check server connection.`);
+            }
+        }
+        
+        // 🟢 NEW: Scanner Initialization Logic using jsQR
+        let scannerActive = false;
+        let videoStream = null;
+
+        async function startQrScanner() {
+            // Reset UI state for scanning
+            document.getElementById('result-container').classList.add('hidden');
+            document.getElementById('qr-reader-container').classList.remove('hidden');
+            document.getElementById('qr-reader-results').textContent = 'Initializing camera...';
+            document.getElementById('qr-reader-results').classList.remove('hidden');
+
+            try {
+                // Request camera access
+                const constraints = {
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
+
+                videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+                const video = document.getElementById('qr-reader-video');
+                video.srcObject = videoStream;
+
+                // Wait for video to load metadata
+                video.onloadedmetadata = () => {
+                    video.play();
+                    document.getElementById('qr-reader-results').textContent = '📷 Camera ready - Position QR code in frame';
+                    scannerActive = true;
+                    scanForQRCode();
+                };
+
+            } catch (error) {
+                console.error('❌ Camera access error:', error);
+                let errorMessage = 'Camera access denied. ';
+                
+                if (error.name === 'NotAllowedError') {
+                    errorMessage += 'Please allow camera access in your browser permissions.';
+                } else if (error.name === 'NotFoundError') {
+                    errorMessage += 'No camera device found.';
+                } else if (error.name === 'NotReadableError') {
+                    errorMessage += 'Camera is already in use by another application.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                document.getElementById('qr-reader-results').textContent = '❌ ' + errorMessage;
+                document.getElementById('qr-reader-results').style.color = '#dc3545';
+            }
+        }
+
+        function scanForQRCode() {
+            const video = document.getElementById('qr-reader-video');
+            const canvas = document.getElementById('qr-reader-canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas size to match video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            const scanLoop = () => {
+                if (!scannerActive) return;
+
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    // Draw video frame to canvas
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                    // Scan for QR code
+                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: 'dontInvert'
+                    });
+
+                    if (code) {
+                        console.log('✅ QR Code detected:', code.data);
+                        scannerActive = false;
+                        
+                        // Stop the video stream
+                        if (videoStream) {
+                            videoStream.getTracks().forEach(track => track.stop());
+                        }
+                        
+                        let reservationHash = code.data.trim();
+                        
+                        // Extract hash from URL if needed
+                        if (code.data.includes('hash=')) {
+                            try {
+                                const url = new URL(code.data);
+                                reservationHash = url.searchParams.get('hash');
+                            } catch (e) {
+                                const parts = code.data.split('hash=');
+                                if (parts.length > 1) {
+                                    reservationHash = parts[1].split('&')[0].trim();
+                                }
+                            }
+                        }
+                        
+                        console.log('📝 Extracted hash:', reservationHash);
+                        performCheckIn(reservationHash);
+                        return;
+                    }
+                }
+
+                requestAnimationFrame(scanLoop);
+            };
+
+            scanLoop();
+        }
+
+        // 🟢 MODIFIED: Window Load Logic with automatic token fetching
+        window.onload = async function() {
+            console.log('✅ Page loaded, initializing check-in terminal...');
+            
+            // Fetch fresh staff token on page load
+            try {
+                await fetchStaffToken();
+            } catch (error) {
+                console.error('❌ Failed to initialize - could not obtain authorization token');
+            }
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const hashInUrl = urlParams.get('hash');
+            
+            if (hashInUrl) {
+                console.log('🔗 Hash found in URL, processing:', hashInUrl);
+                // If hash is present in URL, process it immediately (for testing)
+                performCheckIn(hashInUrl);
+            } else {
+                console.log('📷 No URL hash found, initializing QR scanner...');
+                // If no hash in URL, start the camera scanner
+                // Small delay to ensure DOM is ready
+                setTimeout(() => {
+                    startQrScanner();
+                }, 500);
+            }
+        };
+    </script>
+</body>
+</html>

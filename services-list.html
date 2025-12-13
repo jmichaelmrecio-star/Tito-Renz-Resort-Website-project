@@ -137,6 +137,29 @@
             border-top: 1px dashed #ccc;
         }
 
+        .summary-inclusions {
+            margin-top: 15px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            padding: 12px 14px;
+        }
+
+        .summary-inclusions h4 {
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+
+        .summary-inclusions ul {
+            padding-left: 18px;
+            margin: 0;
+            color: #444;
+        }
+
+        .summary-inclusions li + li {
+            margin-top: 6px;
+        }
+
         .button-primary.disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -149,55 +172,108 @@
 <body>
     <header>
         <nav>
-            <h1><a href="index.html" style="color: white; text-decoration: none;">Tito Renz Resort </a></h1>
+            <a href="index.html" class="nav-logo" aria-label="Tito Renz Resort">
+                <img src="images/logo.png" alt="Tito Renz Resort Logo">
+            </a>
             <ul>
                 </ul>
         </nav>
     </header>
 
-    <main>
-        <div id="promo-banner" style="display: none; text-align: center; padding: 10px; background-color: var(--color-accent); color: white; margin-bottom: 20px;">
-        </div>
-        <section id="service-list-area" class="container">
-            <h2>Select Your Room or Venue</h2>
-            
-            <div id="search-summary">
-                Viewing availability for: <span id="dates-display">...</span> | Guests: <span id="guests-display">...</span>
+    <main class="has-fixed-header-offset services-parallax">
+        <div class="services-parallax-inner">
+            <div id="promo-banner" style="display: none; text-align: center; padding: 10px; background-color: var(--color-accent); color: white; margin-bottom: 20px;">
             </div>
-            <p>Click on any service card below to view details and proceed with your reservation (DFD 4.0).</p>
+            <section id="service-list-area" class="container">
+                <h2 style="color: white;">Select Your Room or Venue</h2>
 
-            <div class="booking-layout-container">
-                <div id="service-cards-container">
+                <!-- Filters (reuse amenities filter styles) -->
+                <section class="amenities-filters-section" style="margin-top: 1rem;">
+                    <div class="filter-card">
+                        <div class="filter-controls">
+                            <div class="filter-group">
+                                <label for="services-type-filter">Type</label>
+                                <select id="services-type-filter" class="filter-select">
+                                    <option value="all">All</option>
+                                    <option value="villa">Villa</option>
+                                    <option value="charm">Charm</option>
+                                    <option value="venue">Venue</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="services-capacity-filter">Max Guests</label>
+                                <select id="services-capacity-filter" class="filter-select">
+                                    <option value="0">Any</option>
+                                    <option value="4">Up to 4</option>
+                                    <option value="6">6 or more</option>
+                                    <option value="10">Up to 10</option>
+                                    <option value="20">Up to 20</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!--<div id="search-summary">
+                    Viewing availability for: <span id="dates-display">...</span> | Guests: <span id="guests-display">...</span>
                 </div>
+                <p>Click on any service card below to view details and proceed with your reservation (DFD 4.0).</p>...-->
 
-                <aside id="booking-summary-sidebar">
-                    <h3>Booking Summary</h3>
-                    <div class="summary-details" style="margin-top: 15px;">
-                        <p style="font-weight: bold;">Selected Room:</p>
-                        <p id="summary-room">No room selected yet</p>
+                <div class="booking-layout-container">
+                    <div id="service-cards-container">
                     </div>
 
-                    <hr style="margin: 15px 0;">
+                    <aside id="booking-summary-sidebar">
+                        <h3>Booking Summary</h3>
+                        <div class="summary-details" style="margin-top: 15px;">
+                            <p style="font-weight: bold;">Selected Room:</p>
+                            <p id="summary-room">No room selected yet</p>
+                        </div>
 
-                    <div class="summary-total">
-                        <p style="font-size: 1.1rem; font-weight: bold; color: var(--primary-color);">Total Charge:</p>
-                        <p id="summary-price" style="font-size: 1.5rem; font-weight: bold; color: #dc3545;">P0.00</p>
-                    </div>
+                        <div id="summary-inclusions" class="summary-inclusions" style="display: none;">
+                            <h4>Inclusions</h4>
+                            <ul id="summary-inclusions-list"></ul>
+                        </div>
 
-                    <a href="#" class="button-primary disabled" id="sidebar-proceed-button" style="width: 100%; margin-top: 20px;" onclick="alert('Please select a room first!'); return false;">Continue Booking</a>
+                        <hr style="margin: 15px 0;">
 
-                </aside>
-            </div>
-        </section>
+                        <div class="summary-total">
+                            <p style="font-size: 1.1rem; font-weight: bold; color: var(--primary-color);">Total Charge:</p>
+                            <p id="summary-price" style="font-size: 1.5rem; font-weight: bold; color: #dc3545;">P0.00</p>
+                        </div>
+
+                        <a href="#" class="button-primary disabled" id="sidebar-proceed-button" style="width: 100%; margin-top: 20px;" onclick="showModal('No Service Selected', '<p>Please select a service before proceeding with your booking.</p>', 'warning'); return false;">Continue Booking</a>
+
+                    </aside>
+                </div>
+            </section>
+        </div>
     </main>
 
     <div id="serviceModal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
             <h2 id="modal-name">Service Name</h2>
-            <p>Price: <span id="modal-price" style="font-weight: bold;"></span></p>
+            <p>Max Guests: <span id="modal-max-guests"></span></p>
             <p id="modal-description" style="margin-top: 15px;"></p>
-            <a href="#" id="modal-proceed-button" class="button-primary">Proceed to Reservation Form</a>
+            
+            <!-- Duration/Time Slot Selection -->
+            <div id="modal-duration-section" style="margin-top: 20px;">
+                <label for="modal-duration-select" style="font-weight: bold;">Select Duration/Time Slot:</label>
+                <select id="modal-duration-select" style="width: 100%; padding: 8px; margin-top: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>
+            
+            <p style="margin-top: 15px;">Price: <span id="modal-price" style="font-weight: bold; font-size: 1.3rem; color: var(--primary-color);">Select duration</span></p>
+            
+            <!-- Inclusions Display -->
+            <div id="modal-inclusions" style="margin-top: 20px; display: none;">
+                <h4>Inclusions:</h4>
+                <ul id="modal-inclusions-list" style="list-style: disc; padding-left: 25px;"></ul>
+            </div>
+            
+            <a href="#" id="modal-proceed-button" class="button-primary" style="margin-top: 20px; pointer-events: none; opacity: 0.5;">Proceed to Reservation Form</a>
         </div>
     </div>
 
@@ -234,6 +310,8 @@
         </div>
     </footer>
 
+    <script src="notifications.js"></script>
     <script src="script.js"></script>
+    <script src="incomplete-reservation-tracker.js"></script>
 </body>
 </html>

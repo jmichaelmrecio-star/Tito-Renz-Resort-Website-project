@@ -9,34 +9,171 @@
 <body>
 
     <header>
-        <h1><a href="index.html" style="color: white; text-decoration: none;">Tito Renz Resort</a></h1>
-            <ul>
-                </ul>
+        <nav>
+            <a href="index.html" class="nav-logo" aria-label="Tito Renz Resort">
+                <img src="images/logo.png" alt="Tito Renz Resort Logo">
+            </a>
+            <ul></ul>
+        </nav>
     </header>
 
-    <main class="container">
+    <main class="container has-fixed-header-offset">
         <h2>💰 Finalize Your Reservation Payment</h2>
         <p>Your booking details have been saved. Please complete the payment via **GCash** to confirm your reservation.</p>
         
-        <div class="payment-summary">
-            <h3>Reservation Summary:</h3>
-            <p>Service: <span id="serviceNameDisplay"></span></p>
-            <p>Customer Name: <span id="summaryCustomerName" style="font-weight: bold;"></span></p>
-            <p>Total Amount Due: <strong class="total-amount">₱<span id="paymentAmount">0.00</span></strong></p>
-        </div>
-
         <form id="gcashPaymentForm">
+            <!-- Reservation Summary Section -->
+            <div class="payment-summary-section">
+                <h3>Reservation Summary</h3>
+                <div class="summary-row">
+                    <span class="summary-label">Service:</span>
+                    <span class="summary-value" id="serviceNameDisplay"></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Customer Name:</span>
+                    <span class="summary-value" id="summaryCustomerName"></span>
+                </div>
+                <div class="summary-row total-row">
+                    <span class="summary-label">Total Amount Due:</span>
+                    <span class="summary-value total-amount">₱<span id="paymentAmount">0.00</span></span>
+                </div>
+            </div>
+            
+            <hr style="margin: 1.5rem 0; border: none; border-top: 2px solid #e9ecef;">
+            
+            <!-- QR Code Section -->
+            <div class="qr-section">
+                <h3>Scan to Pay with GCash</h3>
+                <div class="qr-container">
+                    <img src="images/QR.png" alt="GCash QR Code" class="qr-code" id="gcashQRCode">
+                </div>
+                <p class="qr-instruction">Use your GCash app to scan this QR code and send the payment.</p>
+            </div>
+            
+            <hr style="margin: 1.5rem 0; border: none; border-top: 2px solid #e9ecef;">
+            
+            <!-- Reference Number Form Group -->
             <div class="form-group">
                 <label for="gcashReferenceNumber">GCash Reference Number:</label>
                 <input type="text" id="gcashReferenceNumber" placeholder="Enter 10-13 digit reference number" required>
                 <small>Please pay the amount (₱<span id="paymentAmountSmall">0.00</span>) to our official GCash number before proceeding.</small>
             </div>
             
-            <button type="submit" class="btn btn-primary">Submit Payment & Confirm Booking</button>
-            <a href="reserve.html" class="btn btn-secondary">Go Back to Reservation Details</a>
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary">Submit Payment & Confirm Booking</button>
+                <a href="reserve.html" class="btn btn-secondary">Go Back to Reservation Details</a>
+            </div>
         </form>
     </main>
 
+    <script src="notifications.js"></script>
     <script src="script.js"></script>
+    <script src="incomplete-reservation-tracker.js"></script>
+    
+    <script>
+    // Populate payment page with reservation data
+    document.addEventListener('DOMContentLoaded', function() {
+        // CRITICAL FIX: Recover from localStorage if sessionStorage is empty
+        if (typeof recoverServiceDataFromStorage === 'function') {
+            recoverServiceDataFromStorage();
+        }
+        
+        // Get reservation data from sessionStorage (now recovered if needed)
+        const serviceName = sessionStorage.getItem('selectedServiceName') || 
+                           localStorage.getItem('selectedServiceName') || 'Service';
+        const customerName = sessionStorage.getItem('customerName') || 
+                            localStorage.getItem('customerName') || 'Guest';
+        const finalTotal = sessionStorage.getItem('finalTotal') || 
+                          localStorage.getItem('finalTotal') || '0.00';
+        
+        console.log('\ud83d\udcb0 Payment page data loaded:', { serviceName, customerName, finalTotal });
+        
+        // CRITICAL: Store reservation ID and hash in hidden data attributes or sessionStorage for form submission
+        const urlParams = new URLSearchParams(window.location.search);
+        const reservationIdFromUrl = urlParams.get('reservationId');
+        const reservationHashFromUrl = urlParams.get('hash');
+        
+        // Use URL params if available, fallback to sessionStorage
+        const finalReservationId = reservationIdFromUrl || sessionStorage.getItem('current_reservation_id');
+        const finalReservationHash = reservationHashFromUrl || sessionStorage.getItem('current_reservation_hash');
+        
+        // Store in sessionStorage for access during form submission
+        if (finalReservationId) {
+            sessionStorage.setItem('payment_reservation_id', finalReservationId);
+        }
+        if (finalReservationHash) {
+            sessionStorage.setItem('payment_reservation_hash', finalReservationHash);
+        }
+        
+        console.log('Payment page loaded with reservation:', {
+            reservationId: finalReservationId,
+            reservationHash: finalReservationHash,
+            serviceName,
+            customerName,
+            finalTotal
+        });
+        
+        // Display service name
+        const serviceDisplay = document.getElementById('serviceNameDisplay');
+        if (serviceDisplay) {
+            serviceDisplay.textContent = serviceName;
+        }
+        
+        // Display customer name
+        const customerDisplay = document.getElementById('summaryCustomerName');
+        if (customerDisplay) {
+            customerDisplay.textContent = customerName;
+        }
+        
+        // Display payment amounts
+        const paymentAmountElements = document.querySelectorAll('#paymentAmount, #paymentAmountSmall');
+        paymentAmountElements.forEach(el => {
+            el.textContent = parseFloat(finalTotal).toFixed(2);
+        });
+        
+        console.log('Payment page loaded with data:', { serviceName, customerName, finalTotal });
+    });
+    
+    // Auto-save payment page state and handle duplicate prevention
+    document.addEventListener('DOMContentLoaded', function() {
+        // PHASE 5: Auto-save payment page on load to capture that user reached payment page
+        const pageLoadData = {
+            selectedServiceId: sessionStorage.getItem('selectedServiceId') || '',
+            selectedServiceName: sessionStorage.getItem('selectedServiceName') || document.getElementById('serviceNameDisplay')?.textContent || '',
+            selectedServicePrice: sessionStorage.getItem('selectedServicePrice') || '',
+            customerName: document.getElementById('summaryCustomerName')?.textContent || '',
+            finalTotal: document.getElementById('paymentAmount')?.textContent || '',
+            paymentPage: true,
+            pageLoadAuto: true
+        };
+        if (typeof saveReservationProgress === 'function') {
+            saveReservationProgress('payment', pageLoadData);
+            console.log('Payment page auto-saved on load:', pageLoadData);
+        }
+        
+        // Auto-save payment page data when reference number is entered
+        const refInput = document.getElementById('gcashReferenceNumber');
+        if (refInput) {
+            let saveTimeout;
+            refInput.addEventListener('input', function() {
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(function() {
+                    const data = {
+                        selectedServiceId: sessionStorage.getItem('selectedServiceId') || '',
+                        selectedServiceName: sessionStorage.getItem('selectedServiceName') || document.getElementById('serviceNameDisplay')?.textContent || '',
+                        selectedServicePrice: sessionStorage.getItem('selectedServicePrice') || '',
+                        customerName: document.getElementById('summaryCustomerName')?.textContent || '',
+                        finalTotal: document.getElementById('paymentAmount')?.textContent || '',
+                        gcashReference: refInput.value || '',
+                        paymentPage: true
+                    };
+                    saveReservationProgress('payment', data);
+                    console.log('Payment page data auto-saved:', data);
+                }, 1000);
+            });
+        }
+    });
+    </script>
 </body>
 </html>
