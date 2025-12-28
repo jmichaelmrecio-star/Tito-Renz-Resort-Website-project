@@ -38,26 +38,52 @@
             style="text-align: center; color: red; margin-bottom: 15px"
           ></p>
           <div class="form-group">
-            <label for="loginEmail">Email:</label>
-            <input type="email" id="loginEmail" name="email" required />
-          </div>
-          <div class="form-group">
-            <label for="loginPassword">Password:</label>
             <input
-              type="password"
-              id="loginPassword"
-              name="password"
+              placeholder="Email"
+              type="email"
+              id="loginEmail"
+              name="email"
               required
             />
           </div>
+          <div class="form-group">
+            <div class="password-input-wrapper">
+              <input
+                placeholder="Password"
+                type="password"
+                id="loginPassword"
+                name="password"
+                required
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                data-target="loginPassword"
+                aria-label="Toggle password visibility"
+              >
+                👁️
+              </button>
+            </div>
+          </div>
           <button type="submit" class="button-primary">Login</button>
+          <p style="text-align: center; margin: 0; margin-top: -15px">
+            <a
+              href="#"
+              style="
+                color: var(--primary-color);
+                text-decoration: none;
+                font-size: 0.9rem;
+              "
+              >Forgot Password?</a
+            >
+          </p>
           <p class="form-footer" style="text-align: center">
             Don't have an account? <a href="register.html">Register Here</a>.
           </p>
         </form>
       </div>
     </main>
-<!--
+    <!--
     <footer>
       <div class="footer-content">
         <div class="footer-section contact-info">

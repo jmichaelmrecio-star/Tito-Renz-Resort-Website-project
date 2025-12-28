@@ -441,18 +441,68 @@ fieldset {
 
 /* Center login form vertically */
 #login-area {
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+    url("images/resort-image.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* Parallax effect */
+  color: white;
+
+  /* Make it fill the viewport height */
+  height: 100vh;
+
+  /* Full-bleed: allow section to span the full viewport width even inside a centered main */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+
+  /* Center the content vertically and horizontally */
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  max-width: 35vw !important;
-  padding-top: 2.5rem;
-
+  padding: 0 var(--spacing);
+  max-width: none !important;
+  padding-top: 3rem !important;
 }
 
 #login-area .form-box {
-  width: 100%;
+  width: 30%;
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Register area with background */
+main#register-area {
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+    url("images/resort-image.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* Parallax effect */
+
+  /* Full-bleed */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+
+  /* Padding for content */
+  padding: 2rem var(--spacing) !important;
+  padding-top: 6.3rem !important;
+
+  /* Center content */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  max-width: none !important;
+}
+
+main#register-area .form-box {
+  position: relative;
+  z-index: 1000;
 }
 
 .form-box h2 {
@@ -469,12 +519,41 @@ fieldset {
 .form-box form {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 15px;
+  margin-top: 15px;
 }
 
 .form-box .form-group {
   display: flex;
   flex-direction: column;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  padding-bottom: 15px;
+  font-size: 1.2rem;
+  color: #6c757d;
+  transition: color 0.2s;
+}
+
+.password-toggle:hover {
+  color: var(--primary-color);
 }
 
 .form-box .form-row {
@@ -484,11 +563,6 @@ fieldset {
 
 .form-box .form-row .form-group {
   flex: 1;
-}
-
-.form-box .form-group label {
-  font-weight: 500;
-  color: var(--text-color);
 }
 
 .form-box .form-group input {
@@ -511,14 +585,11 @@ fieldset {
   padding: 12px;
   font-size: 1rem;
   font-weight: 500;
-  margin-top: 10px;
-  margin-bottom: 1px;
   border-radius: 6px;
 }
 
 .form-box .form-footer {
   text-align: center;
-  margin-top: 0.5rem;
   font-size: 0.95rem;
 }
 
