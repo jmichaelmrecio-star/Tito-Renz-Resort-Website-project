@@ -26,29 +26,173 @@
       <section id="hero-new">
         <div class="hero-content-wrapper">
           <h1>Tito Renz Norzagaray Resort</h1>
-          <p class="tagline">
-            Norzagaray's Best All In 1 Place
-          </p>
+          <p class="tagline">Norzagaray's Best All In 1 Place</p>
           <a href="services-list.html" class="button-secondary">Book Now</a>
         </div>
       </section>
 
       <section id="featured-amenities" class="hero-parallax">
         <div class="hero-content-wrapper">
-          <h2>Our Featured Amenities</h2>
-          <p class="section-tagline">
-            Everything you need for a perfect escape is right here.
-          </p>
+          <h2>What We Offer at Tito Renz Resort</h2>
 
-          <div class="amenities-grid" id="featured-service-cards">
-            <p>Loading featured services...</p>
+          <!-- Main Section Navigation -->
+          <div class="amenities-section-nav">
+            <button class="amenities-section-btn active" data-section="rooms">
+              Rooms
+            </button>
+            <button class="amenities-section-btn" data-section="events">
+              Events Place
+            </button>
+            <button class="amenities-section-btn" data-section="pool">
+              Pool Area
+            </button>
           </div>
-          <a
-            href="amenities.html"
-            class="button-primary"
-            style="margin-top: 2rem"
-            >View Amenities</a
-          >
+
+          <!-- Carousel Container -->
+          <div class="amenities-carousel-wrapper">
+            <!-- Rooms Section Carousel -->
+            <div class="amenities-carousel active" data-section="rooms">
+              <button class="carousel-nav-btn prev">‹</button>
+              <div class="carousel-slides">
+                <div class="carousel-slide active">
+                  <div
+                    class="slide-image"
+                    style="
+                      background: url('images/Villa_room.jpg') center/cover
+                        no-repeat;
+                    "
+                  ></div>
+                  <h4>Villa</h4>
+                  <p>
+                    Spacious villa accommodations with premium amenities and
+                    privacy.
+                  </p>
+                </div>
+                <div class="carousel-slide">
+                  <div
+                    class="slide-image"
+                    style="
+                      background: url('images/Charm_room_1.jpg') center/cover
+                        no-repeat;
+                    "
+                  ></div>
+                  <h4>Charm</h4>
+                  <p>
+                    Cozy and intimate rooms with all the comfort and character
+                    you need.
+                  </p>
+                </div>
+                <div class="carousel-slide">
+                  <div
+                    class="slide-image"
+                    style="
+                      background: url('images/home-room.jpg') center/cover
+                        no-repeat;
+                    "
+                  ></div>
+                  <h4>Home</h4>
+                  <p>
+                    Full home experience with kitchen facilities and spacious
+                    living areas.
+                  </p>
+                </div>
+              </div>
+              <h2>
+                <button class="carousel-nav-btn next">›</button>
+              </h2>
+            
+            </div>
+
+            <!-- Events Place Section Carousel -->
+            <div class="amenities-carousel" data-section="events">
+              <h2>
+                <button class="carousel-nav-btn prev">‹</button>
+              </h2>
+              <div class="carousel-slides">
+                <div class="carousel-slide active">
+                  <div
+                    class="slide-image"
+                    style="
+                      background: url('images/Cloverleaf_Hall.jpg') center/cover
+                        no-repeat;
+                    "
+                  ></div>
+                  <h4>Clover Leaf Hall</h4>
+                  <p>
+                    Large multi-purpose venue perfect for conferences, weddings,
+                    and grand celebrations.
+                  </p>
+                </div>
+                <div class="carousel-slide">
+                  <div
+                    class="slide-image"
+                    style="
+                      background: url('images/2nd_Floor_Resto_Hall.jpg')
+                        center/cover no-repeat;
+                    "
+                  ></div>
+                  <h4>Resto Hall</h4>
+                  <p>
+                    Intimate dining space ideal for family gatherings, corporate
+                    lunches, and small events.
+                  </p>
+                </div>
+              </div>
+              <button class="carousel-nav-btn next">›</button>
+            </div>
+
+            <!-- Pool Area Section Carousel -->
+            <div class="amenities-carousel" data-section="pool">
+              <button class="carousel-nav-btn prev">‹</button>
+              <div class="carousel-slides">
+                <div class="carousel-slide active">
+                  <div
+                    class="slide-image"
+                    style="
+                      background: url('images/Pool_Area.jpg') center/cover
+                        no-repeat;
+                    "
+                  ></div>
+                  <h4>Adult Pool</h4>
+                  <p>
+                    Olympic-sized main pool with diving areas and relaxing
+                    shallow zones.
+                  </p>
+                </div>
+                <div class="carousel-slide">
+                  <div
+                    class="slide-image"
+                    style="
+                      background: url('images/Pool_Area_other_View.jpg')
+                        center/cover no-repeat;
+                    "
+                  ></div>
+                  <h4>Kiddie Pool</h4>
+                  <p>
+                    Safe and shallow pool designed specifically for children's
+                    enjoyment and safety.
+                  </p>
+                </div>
+                <div class="carousel-slide">
+                  <div
+                    class="slide-image"
+                    style="
+                      background: url('images/Pool_Area_other_View_2.jpg')
+                        center/cover no-repeat;
+                    "
+                  ></div>
+                  <h4>Pool Cottages</h4>
+                  <p>
+                    Exclusive cottages poolside with direct pool access and
+                    private lounging areas.
+                  </p>
+                </div>
+              </div>
+              <button class="carousel-nav-btn next">›</button>
+            </div>
+          </div>
+
+          <a href="amenities.html" class="button-primary">View All Amenities</a>
         </div>
       </section>
 
@@ -144,47 +288,5 @@
     <script src="notifications.js"></script>
     <script src="script.js"></script>
     <script src="incomplete-reservation-tracker.js"></script>
-
-    <script>
-      // Render featured service cards on the homepage using services from the database
-      document.addEventListener("DOMContentLoaded", async function () {
-        const container = document.getElementById("featured-service-cards");
-        if (!container) return;
-
-        // Fetch services from database (populates window.cachedServices)
-        await fetchServices();
-        const services = getActiveServices();
-
-        const html = services
-          .map((service) => {
-            const startingPrice = getStartingPrice(service);
-            return `
-            <div class="amenity-card">
-                <img src="${service.image}" alt="${
-              service.name
-            }" style="width:100%;height:auto;border-radius:8px;object-fit:cover;">
-                <div class="card-body">
-                    <h3>${service.name}</h3>
-                    <div class="amenity-desc">${service.description}</div>
-                    <div class="amenity-meta">Starts at ₱${startingPrice.toFixed(
-                      2
-                    )} &bull; Max Guests: ${service.max_guests}</div>
-                    <div class="amenity-actions">
-                        <button class="button-secondary" onclick="openAmenityGallery('${
-                          service.id
-                        }')">More Photos</button>
-                        <a class="button-primary" href="services-list.html?serviceId=${
-                          service.id
-                        }">Book Now</a>
-                    </div>
-                </div>
-            </div>
-        `;
-          })
-          .join("");
-
-        container.innerHTML = html;
-      });
-    </script>
   </body>
 </html>

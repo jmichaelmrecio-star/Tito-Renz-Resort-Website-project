@@ -6429,3 +6429,94 @@ window.activateAccount = activateAccount;
 window.fetchRoles = fetchRoles;
 
 // --- END DOMContentLoaded Listener ---
+
+// --- Featured Amenities Carousel System ---
+document.addEventListener("DOMContentLoaded", () => {
+  // Section navigation (Rooms, Events Place, Pool Area)
+  const sectionButtons = document.querySelectorAll(".amenities-section-btn");
+  const carousels = document.querySelectorAll(".amenities-carousel");
+
+  sectionButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const sectionName = button.getAttribute("data-section");
+
+      // Remove active class from all buttons and carousels
+      sectionButtons.forEach((btn) => btn.classList.remove("active"));
+      carousels.forEach((carousel) => carousel.classList.remove("active"));
+
+      // Add active class to clicked button and corresponding carousel
+      button.classList.add("active");
+      const activeCarousel = document.querySelector(
+        `.amenities-carousel[data-section="${sectionName}"]`
+      );
+      if (activeCarousel) {
+        activeCarousel.classList.add("active");
+
+        // Reset carousel to first slide when switching sections
+        const slides = activeCarousel.querySelectorAll(".carousel-slide");
+        slides.forEach((slide) => slide.classList.remove("active"));
+        if (slides.length > 0) {
+          slides[0].classList.add("active");
+        }
+      }
+    });
+  });
+
+  // Carousel navigation (prev/next buttons)
+  const prevButtons = document.querySelectorAll(".carousel-nav-btn.prev");
+  const nextButtons = document.querySelectorAll(".carousel-nav-btn.next");
+
+  prevButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const carousel = button.closest(".amenities-carousel");
+      if (carousel) {
+        navigateCarousel(carousel, -1);
+      }
+    });
+  });
+
+  nextButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const carousel = button.closest(".amenities-carousel");
+      if (carousel) {
+        navigateCarousel(carousel, 1);
+      }
+    });
+  });
+
+  // Keyboard navigation (left/right arrow keys)
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") {
+      const activeCarousel = document.querySelector(
+        ".amenities-carousel.active"
+      );
+      if (activeCarousel) {
+        navigateCarousel(activeCarousel, -1);
+      }
+    } else if (e.key === "ArrowRight") {
+      const activeCarousel = document.querySelector(
+        ".amenities-carousel.active"
+      );
+      if (activeCarousel) {
+        navigateCarousel(activeCarousel, 1);
+      }
+    }
+  });
+
+  // Helper function to navigate carousel
+  function navigateCarousel(carousel, direction) {
+    const slides = carousel.querySelectorAll(".carousel-slide");
+    if (slides.length === 0) return;
+
+    let currentIndex = Array.from(slides).findIndex((slide) =>
+      slide.classList.contains("active")
+    );
+
+    // Calculate next index (with wrapping)
+    currentIndex = (currentIndex + direction + slides.length) % slides.length;
+
+    // Update active slide
+    slides.forEach((slide) => slide.classList.remove("active"));
+    slides[currentIndex].classList.add("active");
+  }
+});
