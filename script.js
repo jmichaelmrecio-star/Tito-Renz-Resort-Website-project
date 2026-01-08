@@ -1042,10 +1042,12 @@ function normalizeStatusValue(status) {
   if (["paid", "pay", "fully-paid", "confirmed"].includes(normalized)) {
     return "paid";
   }
-  if (
-    ["checked-in", "checkedin", "checked_in", "in-house"].includes(normalized)
-  ) {
+  if (["checked-in", "checkedin", "checked_in", "in-house"].includes(normalized)) {
     return "checked-in";
+  }
+  // Map completion/checkout synonyms to completed
+  if (["completed", "complete", "checked-out", "checkedout", "checked_out"].includes(normalized)) {
+    return "completed";
   }
   if (["cancelled", "canceled", "void", "refunded"].includes(normalized)) {
     return "cancelled";
@@ -1258,18 +1260,20 @@ function populateAdminReservationTable(listElement, data = []) {
     if (!res.gcashReferenceNumber) {
       row.style.backgroundColor = "#fff5f5";
     }
+
     const statusValue = getReservationStatus(res);
     const statusClass = getStatusClass(statusValue);
+    const canCheckout = statusValue === "checked-in";
+
     row.innerHTML = `
             <td>${formatReservationId(res._id || res.id)}</td>
             <td>${res.full_name || res.customer_name || "N/A"}</td>
             <td>${res.email || "N/A"}</td>
             <td>${res.serviceType || "N/A"}</td>
             <td>${formatReservationDate(res.check_in || res.checkin_date)}</td>
+            <td>${formatReservationDate(res.check_out || res.checkout_date)}</td>
             <td>₱${normalizeCurrencyValue(res.finalTotal).toFixed(2)}</td>
-            <td><span class="${statusClass}">${getDisplayStatusText(
-      statusValue
-    )}</span></td>
+            <td><span class="${statusClass}">${getDisplayStatusText(statusValue)}</span></td>
             <td>${res.gcashReferenceNumber || "MISSING"}</td>
             <td>
                 <button 
@@ -1284,6 +1288,11 @@ function populateAdminReservationTable(listElement, data = []) {
                     class="bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded text-sm ml-1"
                     onclick="cancelReservation('${res._id || res.id}')"
                 >Cancel</button>
+                <button 
+                    class="${canCheckout ? "bg-purple-500 hover:bg-purple-700" : "bg-gray-400"} text-white py-1 px-3 rounded text-sm ml-1"
+                    ${canCheckout ? "" : "disabled"}
+                    onclick="checkoutReservation('${res._id || res.id}')"
+                >Check-out</button>
             </td>
         `;
 
@@ -2292,7 +2301,7 @@ async function deleteUser(userId) {
 async function renderAdminReservations() {
   const list = document.getElementById("admin-reservation-list");
 
-  // Important: We should also check the user role here to prevent public access.
+  // Role guard
   const userRole = getCurrentRole();
   if (userRole !== "admin" && userRole !== "manager") {
     if (list) {
@@ -2332,7 +2341,17 @@ async function renderAdminReservations() {
       return;
     }
 
-    populateAdminReservationTable(list, combinedReservations);
+    // Apply "Checked-out only" filter if enabled
+    const filterEl = document.getElementById("filter-checked-out-only");
+    const filtered =
+      filterEl && filterEl.checked
+        ? combinedReservations.filter(
+            (r) =>
+              normalizeStatusValue(r.status || r.paymentStatus) === "completed"
+          )
+        : combinedReservations;
+
+    populateAdminReservationTable(list, filtered);
   } catch (error) {
     console.error("Error fetching admin reservations:", error);
     const rendered = renderLocalAdminReservations(list);
@@ -2507,6 +2526,44 @@ async function cancelReservation(reservationId) {
     },
     { confirmText: "Cancel Reservation", cancelText: "Go Back", type: "danger" }
   );
+}
+/**
+ * Sends a request to mark a reservation as COMPLETED (Checked-out).
+ * Enabled only when current status is CHECKED-IN.
+ */
+async function checkoutReservation(reservationId) {
+    showConfirm(
+        'Check-out Reservation',
+        '<p>Mark this reservation as <strong>CHECKED-OUT</strong>?</p><p>This completes the stay and finalizes the record.</p>',
+        async () => {
+            try {
+                const response = await fetch(`http://localhost:3000/api/reservations/${reservationId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'COMPLETED' }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showModal('Check-out Failed', `<p>${data.message || 'Server error during check-out.'}</p>`, 'error');
+                    console.error('Check-out server error:', data);
+                    return;
+                }
+
+                showToast('Reservation marked as CHECKED-OUT (COMPLETED).', 'success');
+
+                // Update local cache and refresh
+                updateLocalReservation(reservationId, { status: 'COMPLETED', paymentStatus: 'PAID' });
+                if (typeof renderAdminReservations === 'function') renderAdminReservations();
+
+            } catch (error) {
+                console.error('Network error during check-out:', error);
+                showModal('Network Error', '<p>A network error occurred. Could not check-out reservation. Please try again.</p>', 'error');
+            }
+        },
+        { confirmText: 'Check-out', cancelText: 'Cancel', type: 'info' }
+    );
 }
 function setMinDate() {
   // Format the date for the 'min' attribute
@@ -5337,6 +5394,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       const countDisplay = document.getElementById("serviceGalleryCount");
       countDisplay.textContent = files.length;
     });
+  }
+
+  // Admin reservations (init + filter listener)
+  if (document.getElementById("admin-reservation-list")) {
+    renderAdminReservations();
+    const filterEl = document.getElementById("filter-checked-out-only");
+    if (filterEl) {
+      filterEl.addEventListener("change", () => renderAdminReservations());
+    }
   }
 
   if (serviceCreateForm)
