@@ -32,6 +32,7 @@ body {
   margin: 0;
   background-color: var(--background-color);
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 /* --- Header and Navigation --- */
@@ -714,7 +715,7 @@ footer {
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
-  margin-bottom: 3rem; /* Add gap between hero-new and featured-amenities */
+  margin-bottom: 0;
 
   /* Center the content vertically and horizontally */
   display: flex;
@@ -813,7 +814,7 @@ footer {
 #featured-amenities h2 {
   color: white;
   font-size: 2.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 2.5rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
@@ -1023,6 +1024,269 @@ footer {
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 40px;
   margin-top: 30px;
+}
+
+/* New Amenity Showcase Cards for Featured Amenities on index.html */
+.amenity-showcase-card {
+  background-color: #fff;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.amenity-showcase-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 24px rgba(40, 167, 69, 0.12);
+}
+
+.amenity-showcase-image {
+  width: 100%;
+  height: 240px;
+  background-size: cover;
+  background-position: center;
+}
+
+.amenity-showcase-card h3 {
+  color: var(--primary-color);
+  margin: 1.5rem 1rem 0.5rem 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+.amenity-showcase-card p {
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.6;
+  padding: 0 1rem;
+  margin: 0.5rem 0;
+}
+
+.amenity-showcase-meta {
+  color: #888;
+  font-size: 0.95rem !important;
+  font-weight: 500;
+  margin-bottom: 1.5rem !important;
+}
+
+/* --- NEW: Amenities Tab Navigation System --- */
+
+/* Main section navigation buttons */
+.amenities-section-nav {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.amenities-section-btn {
+  background-color: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.75rem 1.8rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.amenities-section-btn:hover {
+  border-color: rgba(255, 255, 255, 0.7);
+  color: white;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.amenities-section-btn.active {
+  background-color: white;
+  border-color: white;
+  color: var(--primary-color);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  font-weight: 700;
+}
+
+/* Carousel wrapper container */
+.amenities-carousel-wrapper {
+  margin-bottom: 0.75rem;
+}
+
+/* Individual carousel (hidden by default) */
+.amenities-carousel {
+  display: none;
+  animation: fadeIn 0.4s ease;
+}
+
+.amenities-carousel.active {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+/* Carousel slides container */
+.carousel-slides {
+  flex: 1;
+  max-width: 1000px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  background: white;
+}
+
+/* Individual carousel slide */
+.carousel-slide {
+  display: none;
+  text-align: center;
+  animation: fadeIn 0.5s ease;
+}
+
+.carousel-slide.active {
+  display: block;
+}
+
+/* Slide image area */
+.slide-image {
+  width: 100%;
+  height: 400px;
+  background-size: cover;
+  background-position: center;
+  margin-bottom: 0;
+  border-radius: 12px 12px 0 0;
+}
+
+/* Slide text content */
+.carousel-slide h4 {
+  color: var(--primary-color);
+  margin: 2rem 2rem 0.75rem 2rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-slide p {
+  color: #444;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin: 0.75rem 2rem 2rem 2rem;
+  padding: 0;
+}
+
+/* Carousel navigation buttons */
+.carousel-nav-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  color: white;
+  width: 60px;
+  height: 60px;
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+  padding-bottom: 0.5rem;
+}
+
+.carousel-nav-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(40, 167, 69, 0.4) 0%,
+    rgba(40, 167, 69, 0.3) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.8);
+  transform: scale(1.15);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+}
+
+.carousel-nav-btn:active {
+  transform: scale(0.95);
+}
+
+.carousel-nav-btn.prev {
+  order: -1;
+}
+
+.carousel-nav-btn.next {
+  order: 1;
+}
+
+/* Responsive adjustments for carousel */
+@media (max-width: 768px) {
+  .amenities-section-nav {
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .amenities-section-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.95rem;
+  }
+
+  .amenities-carousel.active {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .carousel-slides {
+    max-width: 100%;
+  }
+
+  .slide-image {
+    height: 280px;
+  }
+
+  .carousel-nav-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.5rem;
+  }
+
+  .carousel-nav-btn.prev {
+    order: 0;
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .carousel-nav-btn.next {
+    order: 0;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .carousel-slides {
+    position: relative;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Amenity Card Styles for amenities.html */
